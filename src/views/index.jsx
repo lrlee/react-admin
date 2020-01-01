@@ -9,29 +9,7 @@ class index extends Component {
     render (){
         return (
             <BrowserRouter>
-                <Layout>
-                    <Sider
-                        breakpoint ='xs'
-                        style={{
-                            overflow:'auto',
-                            height:'100vh',
-                            position:'fixed',
-                            left:'0',
-                            background:'#fff'
-                        }}
-                    >
-                    <NavBar/>
-                    </Sider>
-                    <Layout 
-                        style={{marginLeft:'200px',height:'100vh'}}
-    h               >
-                        <Header>Header</Header>
-                        <Content>
-                            <Routes />
-                        </Content>
-                        <Footer>Footer</Footer>
-                    </Layout>
-                </Layout>
+                <Routes/>
             </BrowserRouter>
         )
     }

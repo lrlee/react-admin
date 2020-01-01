@@ -1,11 +1,15 @@
 import React,{Component} from 'react';
 import styled from 'styled-components';
 import {List,Card,Icon,Row,Col} from 'antd';
-// import Echarts from '@/views/Echarts';
+import Echarts from '@/views/Echarts';
+import TableList from '@/components/table'
 const HomeStyled = styled.div`
     padding:20px;
+    .ant-card{
+        border-radius:8px; 
+    }
     .item_box{
-        
+        border-radius:8px;
         .ant-card-body{
             display:flex;
             flex-direction: column;
@@ -20,6 +24,26 @@ const HomeStyled = styled.div`
                 >i{
                     color:#679bdc;
                     font-size:14px;
+                }
+            }
+        }
+    }
+    .echarts_box{
+        background:#fff;
+        padding:20px;
+        border-radius:8px;
+    }
+    .order_list_box{
+        margin-top:20px;
+        background:#fff;
+        padding:20px;
+        .title{
+            padding:20px 0 0 20px;
+        }
+        .ant-table-thead{
+            >tr{
+                >th{
+                    background:#fff;
                 }
             }
         }
@@ -97,7 +121,12 @@ class Home extends Component {
                     </Col>
                     </Row>
                     <div className="echarts_box">
-                            {/* <Echarts/> */}
+                        <p className="title">近期交易统计</p>
+                        <Echarts/>
+                    </div>
+                    <div className="order_list_box">
+                        <p className="title">最新订单信息</p>
+                        <TableList/>
                     </div>
                 </div>
             </HomeStyled>

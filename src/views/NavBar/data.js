@@ -34,12 +34,12 @@ const NavBarList = [
                 path:'/sort'
             },
             {
-                name:'商品列表',
-                path:'/list'
-            },
-            {
                 name:'添加商品',
                 path:'/add'
+            },
+            {
+                name:'商品列表',
+                path:'/list'
             },
             {
                 name:'回收站',
@@ -80,7 +80,7 @@ const NavBarList = [
         ]
     },
     {
-        name:'体现管理',
+        name:'提现管理',
         path:'/withdraw',
         children:[
             {

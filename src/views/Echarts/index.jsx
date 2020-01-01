@@ -22,7 +22,7 @@ const data = {
             type: 'line'
         }]
     }
-class _Echarts extends Component {
+class Echarts extends Component {
     render(){
         return (
             <ReactEcharts option={data}/>
@@ -30,4 +30,4 @@ class _Echarts extends Component {
     }
 }
 
-export default _Echarts;
+export default Echarts;

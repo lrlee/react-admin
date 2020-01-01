@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Menu, Icon, Button } from 'antd'
-import NavBarList from './index.js'
+import NavBarList from './data.js'
 const { SubMenu } = Menu;
 class NavBar extends Component {
     componentDidMount(){
