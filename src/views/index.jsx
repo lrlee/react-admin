@@ -1,17 +1,20 @@
 import React,{Component} from 'react';
-import {BrowserRouter} from 'react-router-dom';
+import {Route,Switch} from 'react-router-dom'
 import styled  from 'styled-components';
 import {Layout} from 'antd';
 import NavBar from '@/views/NavBar';
 import Routes from '@/router';
-const {Sider,Header,Content,Footer} = Layout;
+import Login from '@/views/Login'
+import HomePage from '@/views/Home/home'
+import PrivateRoute from '@/router/PrivateRoute'
 class index extends Component {
     render (){
         return (
-            <BrowserRouter>
-                <Routes/>
-            </BrowserRouter>
+            <Switch>
+                <Route path='/login' component={Login}/>
+                <PrivateRoute path='/' component={HomePage}/>
+            </Switch>
         )
-    }
+    }   
 }
-export default index;
+export default index;      

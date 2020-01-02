@@ -67,17 +67,13 @@ const WithdrawList = Loadable({
     loader:()=>import('@/views/withdraw/list'),
     loading:Loading
 })
-const Login = Loadable({
-    loader:()=>import('@/views/login'),
-    loading:Loading
-})
 //Switch标签：有此标签时，则其中的route在路径相同的情况下，只匹配第一个，可以避免重复匹配
 class Routes extends Component {
     render(){
         return (
             <ConfigProvider>
                 <Switch>
-                    <Route exact path='/' component={Login} />
+                    <Route exact path='/' component={Home} />
                     <Route exact path='/store' component={Store} />
                     <Route exact path='/store/log' component={LoginLog}/>
                     <Route exact path='/store/edit' component={UserSettings}/>
