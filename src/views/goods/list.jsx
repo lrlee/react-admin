@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch } from 'antd';
+import { Form, Input, Select, Button, Table, Switch, Modal } from 'antd';
 
 const { Option } = Select;
 const { Column, ColumnGroup } = Table;
@@ -48,65 +48,95 @@ const rowSelection = {
 };
 class GoodsList extends Component {
     state = {
+        //删除分类弹框显隐
+        deletSortVisible:false,
+        //清空分类弹框显隐
+        clearSortVisible:false,
         columns: [
             {
                 title: '商品分类',
-                dataIndex: 'name'
+                dataIndex: 'name',
+                key:1
             },
             {
                 title: '排序(值越大越排前)',
-                dataIndex: 'sort'
+                dataIndex: 'sort',
+                key:2
             },
             {
                 title:'商品名称',
-                dataIndex:'goodsName'
+                dataIndex:'goodsName',
+                key:3
             },
             {
                 title:'代理授权码',
-                dataIndex:'code'
+                dataIndex:'code',
+                key:4
             },
             {
                 title:'价格',
-                dataIndex:'price'
+                dataIndex:'price',
+                key:5
             },
             {
                 title:'代理价格',
-                dataIndex:'proxy_price'
+                dataIndex:'proxy_price',
+                key:6
             },
             {
                 title:'库存(张)',
-                dataIndex:'inventory'
+                dataIndex:'inventory',
+                key:7
             },
             {
                 title:'卖出(张)',
-                dataIndex:'sale'
+                dataIndex:'sale',
+                key:8
             },
             {
                 title:'上下架',
                 dataIndex:'status',
+                key:9,
                 render:(text,record)=>{
                     if (record.status) {
-                        return <Switch checked={true} onChange={this.handleChange} />
+                        return <Switch defaultChecked onChange={this.handleChange} />
                     } else {
-                        return <Switch checked={false} onChange={this.handleChange} />
+                        return <Switch  onChange={this.handleChange} />
                     }
                 }
             },
             {
                 title: '创建时间',
-                dataIndex: 'create_time'
+                dataIndex: 'create_time',
+                key:10
             },
             {
                 title: '操作',
                 dataIndex: 'action',
+                key:11,
                 render: (text, record) => {
                     return (
                         <div className="action_box">
-                            <Link to='/store/link'>链接</Link>
-                            <Link to='/goods/add'>加卡</Link>
-                            <Link to='/store/link'>编辑</Link>
-                            <span className="export_btn" onClick={()=>this.deleteSort()}>删除</span>
-                            <span className="clear_btn" onClick={()=>this.clearSort()}>清空</span>
+                            <Link to={{
+                                pathname:'/store/link',
+                                state:{
+                                    title:'店铺链接'
+                                }
+                            }}>链接</Link>
+                            <Link to={{
+                                pathname:'/card/add',
+                                state:{
+                                    title:'添加虚拟卡'
+                                }
+                            }}>加卡</Link>
+                            <Link to={{
+                                pathname:'/goods/add',
+                                state:{
+                                    title:'编辑商品'
+                                }
+                            }}>编辑</Link>
+                            <span className="export_btn" onClick={()=>this.deleteGoods()}>删除</span>
+                            <span className="export_btn" onClick={()=>this.clearCard()}>清空虚拟卡</span>
                         </div>
                     )
                 }
@@ -114,7 +144,7 @@ class GoodsList extends Component {
         ],
         dataSource: [
             {
-                id: 1,
+                key: 1,
                 name: '分类1',
                 sort: 1,
                 status: 0,
@@ -127,14 +157,14 @@ class GoodsList extends Component {
                 sale:1
             },
             {
-                id: 2,
+                key: 2,
                 name: '分类2',
                 sort: 0,
                 status: 1,
                 create_time: '2019-12-28'
             },
             {
-                id: 3,
+                key: 3,
                 name: '分类3',
                 sort: 1,
                 status: 1,
@@ -142,20 +172,23 @@ class GoodsList extends Component {
             }
         ]
     }
+    handleChange(data,flag){
+        console.log(data,flag,"flag")
+    }
     //导出报表
     exportExcel(){
         console.log('导出报表')
     }
-    //清空分类
-    clearSort(){
-        console.log("清空分类")
+    //清空虚拟卡
+    clearCard(){
+        this.setState({clearSortVisible:true})
     }
-    //删除分类
-    deleteSort(){
-        console.log('删除分类')
+    //删除商品
+    deleteGoods(){
+        this.setState({deletSortVisible:true})
     }
     render() {
-        const {columns,dataSource}=this.state
+        const {columns,dataSource,deletSortVisible,clearSortVisible}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <GooodListStyle>
@@ -200,6 +233,24 @@ class GoodsList extends Component {
                 <div className="table_list_box">
                     <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
                 </div>
+                <Modal 
+                    visible={deletSortVisible}
+                    title='删除分类'
+                    onCancel={()=>this.setState({deletSortVisible:false})}
+                    onOk={()=>this.deleteGoods()}
+                >
+                    <p className="tips" style={{fontSize:'20px',textAlign:'center'}}>确定删除该商品吗？</p>
+                    <p style={{fontSize:'14px',textAlign:'center'}}>删除的商品将进入回收站</p>
+                </Modal>
+                <Modal
+                    visible={clearSortVisible}
+                    title='清空虚拟卡'
+                    onCancel={()=>this.setState({clearSortVisible:false})}
+                    onOk={()=>this.clearCard()}
+                >
+                    <p style={{fontSize:'20px',textAlign:'center',color:'#000'}}>确定清空该商品所有未售虚拟卡吗？</p>
+                    <p style={{fontSize:'14px',textAlign:'center'}}>删除的虚拟卡将进入回收站</p>
+                </Modal>
             </GooodListStyle>
         )
     }

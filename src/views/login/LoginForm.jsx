@@ -64,6 +64,7 @@ class LoginForm extends React.Component {
           })
           return
         }
+        document.cookie='sessionId=afa1222'
         const {from} =  {from: {pathname: '/'}}
         this.props.history.push(from)
        

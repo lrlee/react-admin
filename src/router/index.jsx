@@ -1,5 +1,5 @@
 import React,{Component} from 'react'
-import {Route,Redirect,Switch,withRouter,BrowserRouter} from 'react-router-dom'
+import {Route,Switch,withRouter,BrowserRouter} from 'react-router-dom'
 import Loadable from 'react-loadable'
 import { ConfigProvider} from 'antd'
 import Loading from '@/views/Loading'
@@ -51,6 +51,10 @@ const AddCard = Loadable({
     loader:()=>import("@/views/virtualCard/add"),
     loading:Loading
 })
+const RecycleCard = Loadable({
+    loader:()=>import("@/views/virtualCard/recycle"),
+    loading:Loading
+})
 const OrderList = Loadable({
     loader:()=>import("@/views/order/list"),
     loading:Loading
@@ -73,7 +77,7 @@ class Routes extends Component {
         return (
             <ConfigProvider>
                 <Switch>
-                    <Route exact path='/' component={Home} />
+                    <Route exact text='首页222' path='/' component={Home} />
                     <Route exact path='/store' component={Store} />
                     <Route exact path='/store/log' component={LoginLog}/>
                     <Route exact path='/store/edit' component={UserSettings}/>
@@ -85,6 +89,7 @@ class Routes extends Component {
                     <Route exact path='/goods/recycle' component = {RecycleList}/>
                     <Route exact path='/card/list' component={VirtualCardList}/>
                     <Route exact path='/card/add' component={AddCard}/>
+                    <Route exact path='/card/recycle' component={RecycleCard}/>
                     <Route exact path='/order/list' component={OrderList}/>
                     <Route exact path='/order/analysis' component={RevenueAnalysis}/>
                     <Route exact path='/withdraw/apply' component={ApplyWithdraw}/>

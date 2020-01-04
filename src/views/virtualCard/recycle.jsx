@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { Form, Input, Select, Button, Table, Switch, Modal } from 'antd';
 
 const { Option } = Select;
+const { TextArea } = Input;
 const { Column, ColumnGroup } = Table;
 const formItemLayout = {
     labelCol: {
@@ -15,8 +16,8 @@ const formItemLayout = {
         sm: { span: 12 },
     },
 };
-const CardListStyle = styled.div`
-    padding20px 0;
+const GooodListStyle = styled.div`
+    padding:20px 0;
     background:#fff;
     .top_action_box{
         display:flex;
@@ -46,45 +47,37 @@ const rowSelection = {
         name: record.name,
     }),
 };
-class CardList extends Component {
+class RecycleList extends Component {
     state = {
-        //删除虚拟卡弹框显隐
+        //删除虚拟卡
         deleteVisible:false,
+        restoreVisible:false,
+        //清空回收站
+        clearRecycleVisible:false,
         columns: [
             {
                 title: '商品分类',
                 dataIndex: 'name'
             },
             {
-                title: '商品名称',
-                dataIndex: 'goodsName'
+                title: '排序(值越大越排前)',
+                dataIndex: 'sort'
             },
             {
-                title:'商品价格',
+                title:'商品名称',
+                dataIndex:'goodsName'
+            },
+            {
+                title:'价格',
                 dataIndex:'price'
-            },
-            {
-                title:'卡号',
-                dataIndex:'cardNum'
-            },
-            {
-                title:'卡密',
-                dataIndex:'cardPassword'
-            },
-            {
-                title:'状态',
-                dataIndex:'status',
-                render:(text,record)=>{
-                    if(record.status){
-                        return <span className="status_text">已售出</span>
-                    }else{
-                        return <span className="status_text">未售出</span>
-                    }
-                }
             },
             {
                 title: '创建时间',
                 dataIndex: 'create_time'
+            },
+            {
+                title: '删除时间',
+                dataIndex: 'delete_time'
             },
             {
                 title: '操作',
@@ -92,7 +85,8 @@ class CardList extends Component {
                 render: (text, record) => {
                     return (
                         <div className="action_box">
-                            <span className="export_btn" onClick={()=>this.deleteCard()}>删除</span>
+                            <span className="clear_btn" onClick={()=>this.restoreCard()}>恢复</span>
+                            <span className="delete_btn" onClick={()=>this.deleteCard()}>删除</span>
                         </div>
                     )
                 }
@@ -128,30 +122,32 @@ class CardList extends Component {
             }
         ]
     }
-    //导出报表
-    exportExcel(){
-        console.log('导出报表')
-    }
     //删除分类
     deleteCard(){
-        this.setState({deleteVisible:true})
+    this.setState({deleteVisible:true})
     }
-    //确定删除
+    //恢复分类
+    restoreCard(){
+        this.setState({restoreVisible:true})
+    }
     confirmDelete(){
-        
+
+    }
+    confirmRestore(){
+
     }
     render() {
-        const {columns,dataSource,deleteVisible}=this.state
+        const {columns,dataSource,deleteVisible,restoreVisible,clearRecycleVisible}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
-            <CardListStyle>
+            <GooodListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
                             getFieldDecorator("sortName",{
                                 initialValue:'0'
                             })(
-                                <Select style={{ width: '120px',marginRight:'20px'}}>
+                                <Select style={{ width: '120px'}}>
                                     <Option value="0">全部分类</Option>
                                     <Option value="1">分类1</Option>
                                     <Option value="2">分类2</Option>
@@ -159,34 +155,17 @@ class CardList extends Component {
                             )
                         }
                         {
-                            getFieldDecorator("goods",{
-                                initialValue:'0'
-                            })(
-                                <Select style={{ width: '120px',marginRight:'20px'}}>
-                                    <Option value="0">全部商品</Option>
-                                    <Option value="1">11111</Option>
-                                    <Option value="2">22222</Option>
-                                </Select>
-                            )
-                        }
-                        {
-                            getFieldDecorator("status",{
-                                initialValue:'0'
-                            })(
-                                <Select style={{ width: '120px',marginRight:'20px'}}>
-                                    <Option value="0">全部</Option>
-                                    <Option value="1">已售出</Option>
-                                    <Option value="2">未售出</Option>
-                                </Select>
+                            getFieldDecorator("goodsName")(
+                                <Input style={{ width: '120px', margin: '0 20px 0 20px' }} placeholder="商品名" />
                             )
                         }
 
                         <Button type="primary" className="btn btn-large btn-block btn-default">搜索</Button>
                     </div>
                     <div className="right_box">
-                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
-                        <Button type="danger" style={{ marginRight: '10px' }}  className="btn btn-large btn-block btn-default">添加虚拟卡</Button>
-                        <Button type="primary"  className="btn btn-large btn-block btn-default" onClick={()=>this.exportExcel()}>导出卡密</Button>
+                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量恢复</Button>
+                        <Button type="danger"  style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
+                        <Button type="danger" onClick={()=>this.clearRecycle()} className="btn btn-large btn-block btn-default">清空回收站</Button>
                     </div>
                 </div>
                 <div className="table_list_box">
@@ -196,15 +175,32 @@ class CardList extends Component {
                     visible={deleteVisible}
                     title="删除虚拟卡"
                     onCancel={()=>this.setState({deleteVisible:false})}
-                    onOk={()=>this.confirmDelete()}
+                    onOk={()=>{this.confirmDelete()}}
                 >
-                    <p style={{fontSize:'20px',textAlign:'center',color:'#000'}}>确定删除该虚拟卡吗？</p>
-                    <p style={{fontSize:'14px',textAlign:'center',color:'#000'}}>你可以在回收站恢复该操作</p>
+                    <p style={{fontSize:'20px',textAlign:'center',color:"#000"}}>确定删除该虚拟卡吗？</p>
+                    <p style={{fontSize:'14px',textAlign:'center'}}>删除后将无法恢复</p>
                 </Modal>
-            </CardListStyle>
+                <Modal
+                    visible={restoreVisible}
+                    title='恢复虚拟卡'
+                    onCancel={()=>this.setState({restoreVisible:false})}
+                    onOk={()=>this.confirmRestore()}
+                >
+                    <p style={{fontSize:'20px',textAlign:'center',color:'#000'}}>确定恢复该虚拟卡吗？</p>
+                </Modal>
+                <Modal
+                    visible={clearRecycleVisible}
+                    title='清空回收站'
+                    onCancel={()=>this.setState({clearRecycleVisible:false})}
+                    onOk={()=>this.clearRecycle()}
+                >
+                    <p style={{fontSize:'20px',textAlign:'center',color:'#000'}}>确定清空回收站吗？</p>
+                    <p style={{fontSize:'14px',textAlign:'center'}}>清空后无法恢复</p>
+                </Modal>
+            </GooodListStyle>
         )
     }
 }
 
-export default Form.create()(CardList);
+export default Form.create()(RecycleList);
 

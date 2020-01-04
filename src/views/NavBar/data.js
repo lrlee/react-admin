@@ -1,95 +1,164 @@
 const NavBarList = [
     {
-        name:'首页',
-        path:'/'
+        name:'管理中心',
+        path:'/',
+        state:{
+            title:'管理中心',
+            icon:'home'
+        }
     },
     {
         name:'商家管理',
         path:'/store',
+        state:{
+            title:'商家管理',
+            icon:'user'
+        },
         children:[
             {
                 name:'登录日志',
-                path:'/log'
+                path:'/log',
+                state:{
+                    title:'登录日志'
+                },
             },
             {
                 name:'商家设置',
-                path:'/edit'
+                path:'/edit',
+                state:{
+                    title:'商家设置'
+                }
             },
             {
                 name:'修改密码',
-                path:'/resetPassword'
+                path:'/resetPassword',
+                state:{
+                    title:'修改密码'
+                }
             },
             {
                 name:'店铺链接',
-                path:'/link'
+                path:'/link',
+                state:{
+                    title:'店铺链接'
+                }
             }
         ]
     },
     {
         name:'商品管理',
         path:'/goods',
+        state:{
+            title:"商品管理",
+            icon:'shop'
+        },
         children:[
             {
                 name:'商品分类',
-                path:'/sort'
+                path:'/sort',
+                state:{
+                    title:'商品分类'
+                }
             },
             {
                 name:'添加商品',
-                path:'/add'
+                path:'/add',
+                state:{
+                    title:'添加商品'
+                }
             },
             {
                 name:'商品列表',
-                path:'/list'
+                path:'/list',
+                state:{
+                    title:'商品列表'
+                }
             },
             {
                 name:'回收站',
-                path:'/recycle'
+                path:'/recycle',
+                state:{
+                    title:'回收站'
+                }
             }
         ]
     },
     {
         name:'虚拟卡管理',
         path:'/card',
+        state:{
+            title:'虚拟卡管理',
+            icon:'idcard'
+        },
         children:[
             {
                 name:'虚拟卡列表',
-                path:'/list'
+                path:'/list',
+                state:{
+                    title:'虚拟卡列表'
+                }
             },
             {
                 name:'添加虚拟卡',
-                path:'/add'
+                path:'/add',
+                state:{
+                    title:'添加虚拟卡'
+                }
             },
             {
                 name:'回收站',
-                path:'/recycle'
+                path:'/recycle',
+                state:{
+                    title:'回收站'
+                }
             }
         ]
     },
     {
         name:'订单管理',
         path:'/order',
+        state:{
+            title:'订单管理',
+            icon:'menu'
+        },
         children:[
             {
                 name:'订单列表',
-                path:'/list'
+                path:'/list',
+                state:{
+                    title:'订单列表'
+                }
             },
             {
                 name:'收益分析',
-                path:'/analysis'
+                path:'/analysis',
+                state:{
+                    title:'收益分析'
+                }
             }
         ]
     },
     {
         name:'提现管理',
         path:'/withdraw',
+        state:{
+            title:'提现管理',
+            icon:'wallet'
+        },
         children:[
             {
                 name:'申请提现',
-                path:'/apply'
+                path:'/apply',
+                state:{
+                    title:'申请提现'
+                }
             },
             {
                 name:'提现列表',
-                path:'/list'
+                path:'/list',
+                state:{
+                    title:'提现列表'
+                }
             }
         ]
     }

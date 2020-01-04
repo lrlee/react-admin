@@ -38,7 +38,7 @@ class ApplyWithdraw extends Component {
                     </Form.Item>
                     <Form.Item label='可提现金额'>
                         {getFieldDecorator('amount')(<Input disabled/>)}
-                        <span className="tips_text">不可提现金额：<i className="redNum">0.000</i>元</span>
+                        <span className="tips_text">不可提现金额：<i className="redNum" style={{fontStyle:"normal"}}>0.000</i>元</span>
                     </Form.Item>
                     <Form.Item label='手续费'>
                         {getFieldDecorator('fee')(<Input disabled/>)}

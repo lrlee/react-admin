@@ -26,7 +26,7 @@ class Login extends Component {
     switchShowBox = (box) => {
         console.log(box,"box")
         this.setState({
-        showBox: box
+            showBox: box
         })
     }
     render(){

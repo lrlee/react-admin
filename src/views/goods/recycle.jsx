@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch } from 'antd';
+import { Form, Input, Select, Button, Table, Switch, Modal } from 'antd';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -49,6 +49,10 @@ const rowSelection = {
 };
 class RecycleList extends Component {
     state = {
+        //恢复弹框显隐
+        restoreVisivle:false,
+        //删除弹框显隐
+        deleteVisible:false,
         columns: [
             {
                 title: '商品分类',
@@ -80,8 +84,8 @@ class RecycleList extends Component {
                 render: (text, record) => {
                     return (
                         <div className="action_box">
-                            <span className="clear_btn" onClick={()=>this.restoreSort()}>恢复</span>
-                            <span className="delete_btn" onClick={()=>this.deleteSort()}>删除</span>
+                            <span className="clear_btn" onClick={()=>this.restoreGoods()}>恢复</span>
+                            <span className="delete_btn" onClick={()=>this.deleteGoods()}>删除</span>
                         </div>
                     )
                 }
@@ -118,15 +122,23 @@ class RecycleList extends Component {
         ]
     }
     //删除分类
-    deleteSort(){
-
+    deleteGoods(){
+        this.setState({deleteVisible:true})
+    }
+    //确定删除
+    confirmDelete(){
+        
     }
     //恢复分类
-    restoreSort(){
-        console.log('恢复分类')
+    restoreGoods(){
+        this.setState({restoreVisivle:true})
+    }
+    //确定恢复
+    confirmRestore(){
+
     }
     render() {
-        const {columns,dataSource}=this.state
+        const {columns,dataSource,restoreVisivle,deleteVisible}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <GooodListStyle>
@@ -159,6 +171,23 @@ class RecycleList extends Component {
                 <div className="table_list_box">
                     <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
                 </div>
+                <Modal
+                    visible={restoreVisivle}
+                    title='恢复商品'
+                    onCancel={()=>this.setState({restoreVisivle:false})}
+                    onOk={()=>this.confirmRestore()}
+                >
+                    确定恢复该商品吗？
+                </Modal>
+                <Modal
+                    visible={deleteVisible}
+                    title='删除商品'
+                    onCancel={()=>this.setState({deleteVisible:false})}
+                    onOk={this.confirmDelete()}
+                >
+                    <p style={{fontSize:'20px',textAlign:'center'}}>确定删除该商品吗？</p>
+                    <p style={{fontSize:'14px',textAlign:'center'}}>删除后将不可恢复</p>
+                </Modal>
             </GooodListStyle>
         )
     }

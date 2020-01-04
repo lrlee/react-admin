@@ -1,7 +1,7 @@
 import React,{Component} from 'react';
-import styled from 'styled-components';
 import {Layout} from 'antd';
 import NavBar from '@/views/NavBar';
+import HeaderNav from '@/components/Header'
 import Routes from '@/router';
 const {Sider,Header,Content,Footer} = Layout;
 class HomePage extends Component {
@@ -22,8 +22,8 @@ class HomePage extends Component {
             </Sider>
             <Layout 
                 style={{marginLeft:'200px',minHeight:'100vh'}}>
-                <Header style={{background:'rgb(240, 242, 245)'}}>
-                    header
+                <Header style={{background:'rgb(240, 242, 245)',padding:'0 20px'}}>
+                    <HeaderNav></HeaderNav>
                 </Header>
                 <Content style={{padding:'20px'}}>
                     <Routes />

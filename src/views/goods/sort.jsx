@@ -1,13 +1,18 @@
 import React,{Component} from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom'
-import {Form,Button,Input,Table,Switch                                                                                                                                                                                                                                                     } from 'antd'
+import { Link } from 'react-router-dom';
+import {Form,Button,Input,Table,Switch,Modal} from 'antd'
 const SortStyle=styled.div`
     background:#fff;
     padding:20px;
     .action_box{
         a{
             margin-right:10px;
+        }
+        span{
+            color: #1890ff;
+            margin-right:10px;
+            cursor:pointer;
         }
     }
     .sortList{
@@ -26,6 +31,14 @@ const formItemLayout = {
 }
 class Sort extends Component {
     state={
+        //删除弹框显隐
+        deleteVisible:false,
+        //编辑弹框显隐
+        visible:false,
+        //编辑分类的信息
+        editSortInfo:{
+
+        },
         columns:[
             {
                 title:'分类名称',
@@ -39,11 +52,10 @@ class Sort extends Component {
                 title:'状态',
                 dataIndex:'status',
                 render:(text,record)=>{
-                    console.log(text,record,"record")
                     if(record.status){
-                        return <Switch checked={true} onChange={this.handleChange} />
+                        return <Switch defaultChecked onChange={this.handleChange} />
                     }else{
-                        return <Switch checked={false} onChange={this.handleChange} />
+                        return <Switch  onChange={this.handleChange} />
                     }
                     
                 }
@@ -58,11 +70,28 @@ class Sort extends Component {
                 render:(text,record)=>{
                     return (
                         <div className="action_box">
-                            <Link to='/store/link'>链接</Link>
-                            <Link to='/goods/list'>商品</Link>
-                            <Link to='/card/list'>库存卡</Link>
-                            <Link to='/store/link'>编辑</Link>
-                            <Link to='/store/link'>删除</Link>
+                            <Link to={
+                                {
+                                    pathname:'/store/link',
+                                    state:{
+                                        title:'商铺链接'
+                                    }
+                                }
+                            }>链接</Link>
+                            <Link to={{
+                                pathname:'/goods/list',
+                                state:{
+                                    title:'商品列表'
+                                }
+                            }}>商品</Link>
+                            <Link to={{
+                                pathname:'/card/list',
+                                state:{
+                                    title:'虚拟卡列表'
+                                }
+                            }}>库存卡</Link>
+                            <span onClick={()=>this.editSort(record)}>编辑</span>
+                            <span onClick={()=>this.deleteSort(record)}>删除</span>
                         </div>
                     )
                 }
@@ -95,8 +124,16 @@ class Sort extends Component {
     handleChange(){
 
     }
+    //编辑分类
+    editSort(data){
+        this.setState({visible:true,editSortInfo:data})
+    }
+    //删除分类
+    deleteSort(data){
+        this.setState({deleteVisible:true})
+    }
     render(){
-        const {columns,dataSource} = this.state
+        const {columns,dataSource,editSortInfo,visible,deleteVisible} = this.state
         const {getFieldDecorator} = this.props.form
         return(
             <SortStyle>
@@ -118,6 +155,35 @@ class Sort extends Component {
                 <div className="sortList">
                     <Table dataSource={dataSource} columns={columns} />
                 </div>
+                <Modal
+                    visible = {visible}
+                    title='编辑分类'
+                    onCancel={()=>this.setState({visible:false})}
+                    onOk={()=>this.addSort()}
+                >
+                    <Form>
+                        <Form.Item label="分类名称">
+                            {getFieldDecorator('editSortName',{
+                                initialValue:editSortInfo.name,
+                                rules:[{required:true,message:'请填写分类名称'}]
+                            })(<Input/>)}
+                        </Form.Item>
+                        <Form.Item label="排序">
+                            {getFieldDecorator('editSortRank',{
+                                initialValue:editSortInfo.sort,
+                            })(<Input/>)}
+                        </Form.Item>
+                    </Form> 
+                </Modal>
+                <Modal 
+                    visible = {deleteVisible}
+                    title='删除分类'
+                    onCancel={()=>this.setState({deleteVisible:false})}
+                    onOk={()=>this.deleteSort()}
+                >
+                    确定删除该分类吗？
+
+                </Modal>
             </SortStyle>
         )
     }
