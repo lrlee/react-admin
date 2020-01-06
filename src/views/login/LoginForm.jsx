@@ -1,9 +1,9 @@
 import React from 'react'
 import { randomNum, calculateWidth } from '@/utils'
 import { withRouter } from 'react-router-dom'
-import { Form, Input, Row, Col } from 'antd'
+import { Form, Input, Row, Col, message } from 'antd'
 import PromptBox from '@/components/PromptBox'
-
+import ajax from '@/utils/ajax'
 class LoginForm extends React.Component {
   state = {
     focusItem: -1,   //保存当前聚焦的input
@@ -64,10 +64,26 @@ class LoginForm extends React.Component {
           })
           return
         }
-        document.cookie='sessionId=afa1222'
-        const {from} =  {from: {pathname: '/'}}
-        this.props.history.push(from)
        
+        ajax({
+          url:'userController/login.do',
+          method:'post',
+          data:values
+        }).then(res=>{
+          if(res.data.result){
+            
+            document.cookie=`sessionId=${res.data}`
+            const {from} =  {from: {pathname: '/'}}
+            this.props.history.push(from)
+            message.success(res.data.msg)
+          }else{
+            message.error(res.data.msg)
+          }
+        }).catch(err=>{
+          message.err(err)
+        })
+      }else{
+        message.err(err)
       }
     })
   }
@@ -83,10 +99,10 @@ class LoginForm extends React.Component {
       <div className={this.props.className}>
         <h3 className='title'>管理员登录</h3>
         <Form onSubmit={this.loginSubmit}>
-          <Form.Item help={getFieldError('username') &&
-          <PromptBox info={getFieldError('username')} width={calculateWidth(getFieldError('username'))}/>}>
-            {getFieldDecorator('username', {
-              rules: [{required: true, message: '请输入用户名'}]
+          <Form.Item help={getFieldError('account') &&
+          <PromptBox info={getFieldError('account')} width={calculateWidth(getFieldError('account'))}/>}>
+            {getFieldDecorator('account', {
+              rules: [{required: true, message: '请输入账户'}]
             })(
               <Input
                 onFocus={() => this.setState({focusItem: 0})}

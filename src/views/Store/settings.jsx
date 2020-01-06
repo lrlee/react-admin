@@ -76,7 +76,7 @@ class UserSettings extends Component {
                             <Form.Item
                                 label="手机号码"
                             >
-                                {getFieldDecorator('phone', {
+                                {getFieldDecorator('telphone', {
                                     rules: [{ required: true, message: '请输入手机号码!' }],
                                 })(<Input style={{ width: '100%' }} />)}
                                 <div>
@@ -86,21 +86,21 @@ class UserSettings extends Component {
                             <Form.Item
                                 label="商户QQ"
                             >
-                                {getFieldDecorator('qq', {
+                                {getFieldDecorator('qq_num', {
                                     rules: [{ required: true, message: '请输入商户qq号码!' }],
                                 })(<Input style={{ width: '100%' }} />)}
                             </Form.Item>
                             <Form.Item
                                 label="QQ群"
                             >
-                                {getFieldDecorator('qqGroup', {
+                                {getFieldDecorator('qq_group', {
                                     rules: [{ required: true, message: '请输入qq群号码!' }],
                                 })(<Input style={{ width: '100%' }} />)}
                             </Form.Item>
                             <Form.Item
                                 label="商户网站"
                             >
-                                {getFieldDecorator('qqGroup', {
+                                {getFieldDecorator('web_addr', {
                                     rules: [{ required: true, message: '请输入网站!' }],
                                 })(<Input style={{ width: '100%' }} />)}
                                 <did className="tops_box">
@@ -110,14 +110,14 @@ class UserSettings extends Component {
                             <Form.Item
                                 label="店铺名称"
                             >
-                                {getFieldDecorator('qqGroup', {
+                                {getFieldDecorator('store_name', {
                                     rules: [{ required: true, message: '请输入店铺名称!' }],
                                 })(<Input style={{ width: '100%' }} />)}
                             </Form.Item>
                             <Form.Item
                                 label="店铺公告"
                             >
-                                {getFieldDecorator('qqGroup', {
+                                {getFieldDecorator('store_notice', {
                                     rules: [{ required: true, message: '请输入店铺公告!' }],
                                 })(<TextArea rows={4} />)}
                             </Form.Item>
@@ -139,7 +139,7 @@ class UserSettings extends Component {
                                     )}
                             </Form.Item>
                             <Form.Item label="购卡协议自动弹出" hasFeedback>
-                                {getFieldDecorator('qqGroup')(
+                                {getFieldDecorator('is_auto')(
                                     <Select defaultValue="1">
                                         <Option value="1">是</Option>
                                         <Option value="2">否</Option>
@@ -147,7 +147,7 @@ class UserSettings extends Component {
                                     )}
                             </Form.Item>
                             <Form.Item label="库存展示方式" hasFeedback>
-                                {getFieldDecorator('qqGroup')(
+                                {getFieldDecorator('show_type')(
                                     <div className="container">
                                         <Select defaultValue="2">
                                             <Option value="1">实际库存</Option>

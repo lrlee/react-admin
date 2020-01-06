@@ -1,10 +1,14 @@
-import { func } from "prop-types"
 
 const LOGIN_COOKIE_NAME = 'sessionId'
 
 //判断是否登录
 export function isAuthenticated(){
-    return _getCookie(LOGIN_COOKIE_NAME)
+    let flag = _getCookie(LOGIN_COOKIE_NAME)
+    console.log()
+    if(!flag || flag==='null' || flag==='undefined'){
+        return false
+    }
+    return true
 }
 
 

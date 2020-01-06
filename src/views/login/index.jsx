@@ -21,17 +21,17 @@ class Login extends Component {
         showBox: 'login',   //展示当前表单
         url: '',  //背景图片
         loading:false,
+        height:300
     }
     //切换showbox
     switchShowBox = (box) => {
-        console.log(box,"box")
         this.setState({
-            showBox: box
+            showBox: box,
+            height:box==='login'?300:480
         })
     }
     render(){
-        const {showBox,loading} = this.state
-        console.log(showBox,"show")
+        const {showBox,loading,height} = this.state
         return(
             <LoginStyle>
                 <div id='login-page'>
@@ -42,7 +42,7 @@ class Login extends Component {
                         </div>:
                         <div>
                         <div id='backgroundBox'/>
-                        <div className='container'>
+                        <div className='container' style={{height:height+'px'}}>
                             <LoginForm
                             className={showBox === 'login' ? 'box showBox' : 'box hiddenBox'}
                             switchShowBox={this.switchShowBox}/>

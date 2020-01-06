@@ -77,7 +77,7 @@ class Routes extends Component {
         return (
             <ConfigProvider>
                 <Switch>
-                    <Route exact text='首页222' path='/' component={Home} />
+                    <Route exact path='/' component={Home} />
                     <Route exact path='/store' component={Store} />
                     <Route exact path='/store/log' component={LoginLog}/>
                     <Route exact path='/store/edit' component={UserSettings}/>

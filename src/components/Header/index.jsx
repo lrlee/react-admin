@@ -33,10 +33,11 @@ const HeaderStyle = styled.div`
 `;
 class HeaderNav extends Component {
     render(){
+        console.log(this.props.location,"lo")
         return (
             <HeaderStyle>
                 <div className="header_container">
-                    <p className="left_text">{this.props.location.state.title}</p>
+                    <p className="left_text">{this.props.location.state && this.props.location.state.title || ""}</p>
                     <div className="right_container">
                         <div className="id_box">
                             ID: <span className="user_id">17361</span>
