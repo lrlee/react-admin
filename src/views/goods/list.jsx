@@ -1,20 +1,10 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch, Modal } from 'antd';
-
+import {connect} from 'react-redux'
+import { Form, Input, Select, Button, Table, Switch, Modal, message } from 'antd';
+import ajax from '@/utils/ajax'
 const { Option } = Select;
-const { Column, ColumnGroup } = Table;
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 },
-    },
-};
 const GooodListStyle = styled.div`
     padding20px 0;
     background:#fff;
@@ -55,7 +45,7 @@ class GoodsList extends Component {
         columns: [
             {
                 title: '商品分类',
-                dataIndex: 'name',
+                dataIndex: 'category_name',
                 key:1
             },
             {
@@ -65,7 +55,7 @@ class GoodsList extends Component {
             },
             {
                 title:'商品名称',
-                dataIndex:'goodsName',
+                dataIndex:'goods_name',
                 key:3
             },
             {
@@ -75,12 +65,12 @@ class GoodsList extends Component {
             },
             {
                 title:'价格',
-                dataIndex:'price',
+                dataIndex:'goods_price',
                 key:5
             },
             {
                 title:'代理价格',
-                dataIndex:'proxy_price',
+                dataIndex:'goods_cost_price',
                 key:6
             },
             {
@@ -142,38 +132,30 @@ class GoodsList extends Component {
                 }
             }
         ],
-        dataSource: [
-            {
-                key: 1,
-                name: '分类1',
-                sort: 1,
-                status: 0,
-                create_time: '2019-12-28',
-                goodsName:"AAAAAAAA",
-                price:20.00,
-                code:'aaabbbb',
-                proxy_price:18,
-                inventory:5,
-                sale:1
-            },
-            {
-                key: 2,
-                name: '分类2',
-                sort: 0,
-                status: 1,
-                create_time: '2019-12-28'
-            },
-            {
-                key: 3,
-                name: '分类3',
-                sort: 1,
-                status: 1,
-                create_time: '2019-12-28'
-            }
-        ]
+        dataSource: []
+    }
+    componentDidMount(){
+        this.getGoodsList()
     }
     handleChange(data,flag){
         console.log(data,flag,"flag")
+    }
+    //获取商品列表
+    getGoodsList(){
+        ajax({
+            url:'/goodsController/getGoods.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({dataSource:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //导出报表
     exportExcel(){
@@ -186,6 +168,11 @@ class GoodsList extends Component {
     //删除商品
     deleteGoods(){
         this.setState({deletSortVisible:true})
+    }
+    toAddGoods(){
+        this.props.history.push({
+            pathname:'/goods/add'
+        })
     }
     render() {
         const {columns,dataSource,deletSortVisible,clearSortVisible}=this.state
@@ -227,7 +214,7 @@ class GoodsList extends Component {
                     <div className="right_box">
                         <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default" onClick={()=>this.exportExcel()}>导出</Button>
                         <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
-                        <Button type="danger" className="btn btn-large btn-block btn-default">添加商品</Button>
+                        <Button type="danger" className="btn btn-large btn-block btn-default" onClick={()=>this.toAddGoods()}>添加商品</Button>
                     </div>
                 </div>
                 <div className="table_list_box">
@@ -255,6 +242,8 @@ class GoodsList extends Component {
         )
     }
 }
-
-export default Form.create()(GoodsList);
+const mapStateToProps=state=>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(GoodsList));
 

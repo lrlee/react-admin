@@ -29,19 +29,19 @@ class LoginLog extends Component {
     getLogList(){
         ajax({
             url:'/userController/loginLogs.do',
-            method:'post',
-            data:{
+            method:'get',
+            params:{
                 account:'lee1991'
             }
         }).then(res=>{
             this.setState({
-                logList:res.data
+                logList:res.data.data
             })
         })
     }
     render(){
-        // console.log(bussion,"window")
         const {logList} = this.state
+        console.log(logList)
         return(
             <LoginLogStyled>
                 <div className="loginLog_box">

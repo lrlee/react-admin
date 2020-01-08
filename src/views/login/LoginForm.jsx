@@ -1,9 +1,11 @@
 import React from 'react'
 import { randomNum, calculateWidth } from '@/utils'
 import { withRouter } from 'react-router-dom'
+import {connect} from 'react-redux'
 import { Form, Input, Row, Col, message } from 'antd'
 import PromptBox from '@/components/PromptBox'
 import ajax from '@/utils/ajax'
+import { actionUserInfo } from './store/action'
 class LoginForm extends React.Component {
   state = {
     focusItem: -1,   //保存当前聚焦的input
@@ -71,8 +73,9 @@ class LoginForm extends React.Component {
           data:values
         }).then(res=>{
           if(res.data.result){
-            
-            document.cookie=`sessionId=${res.data}`
+            sessionStorage.setItem("token",res.data.access_token)
+            sessionStorage.setItem("userInfo",JSON.stringify(res.data.data))
+            this.props.setUserInfo(res.data.data)
             const {from} =  {from: {pathname: '/'}}
             this.props.history.push(from)
             message.success(res.data.msg)
@@ -177,5 +180,7 @@ const styles = {
     opacity: 1
   },
 }
-
-export default withRouter(Form.create()(LoginForm))
+const mapDispatchToProps = dispatch=>({
+  setUserInfo:user=>dispatch(actionUserInfo(user))
+})
+export default connect(null,mapDispatchToProps)(withRouter(Form.create()(LoginForm)))

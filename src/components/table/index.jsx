@@ -16,54 +16,13 @@ const columns = [
   { title: '状态', dataIndex: 'status',key:'status' },
   { title: '支付通道', dataIndex: 'payway', key: 'payway' }
 ];
-const data = [
-    {
-        key:1,
-        num:'T191214223919707468',
-        name:'23244242（2张）',
-        amount:'40.00',
-        date:'12/14 22:39:19',
-        status:'待支付',
-        payway:'支付宝支付'
-    },
-    {
-        key:1,
-        num:'T191214223919707468',
-        name:'23244242（2张）',
-        amount:'40.00',
-        date:'12/14 22:39:19',
-        status:'待支付',
-        payway:'支付宝支付'
-    },
-    {
-        key:1,
-        num:'T191214223919707468',
-        name:'23244242（2张）',
-        amount:'40.00',
-        date:'12/14 22:39:19',
-        status:'待支付',
-        payway:'支付宝支付'
-    },
-    {
-        key:1,
-        num:'T191214223919707468',
-        name:'23244242（2张）',
-        amount:'40.00',
-        date:'12/14 22:39:19',
-        status:'待支付',
-        payway:'支付宝支付'
-    }
-]
 class TableList extends Component {
     state={
         tableData:[]
     }
-    getTableData(){
-
-    }
     render(){
         return (
-            <Table columns={columns} dataSource={data}  />
+            <Table columns={columns} dataSource={this.props.data}  />
         )
     }
 }

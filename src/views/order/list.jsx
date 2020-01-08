@@ -1,21 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
 import { Form, Input, Select, Button, Table, Switch ,DatePicker } from 'antd';
-
 const { Option } = Select;
-const { Column, ColumnGroup } = Table;
 const {RangePicker } = DatePicker 
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 },
-    },
-};
 const OrderListStyle = styled.div`
     padding20px 0;
     background:#fff;
@@ -123,50 +113,19 @@ class OrderList extends Component {
                 }
             }
         ],
-        dataSource: [
-            {
-                id: 1,
-                goodsName:'23244242(1张)',
-                status: 0,
-                pay_time: '2019-12-28',
-                sale:1,
-                orderNum:'T191229105910707450',
-                payway:"微信支付",
-                amount:'20.00',
-                realPay:'18.00',
-                buyerInfo:"1822526252",
-                isTake:1,
-                cardPassword:12456
-            },
-            {
-                id: 1,
-                goodsName:'23244242(1张)',
-                status: 0,
-                pay_time: '2019-12-28',
-                sale:1,
-                orderNum:'T191229105910707450',
-                payway:"微信支付",
-                amount:'20.00',
-                realPay:'18.00',
-                buyerInfo:"1822526252",
-                isTake:1,
-                cardPassword:12456
-            },
-            {
-                id: 1,
-                goodsName:'23244242(2张)',
-                status: 0,
-                pay_time: '2019-12-28',
-                sale:1,
-                orderNum:'T191229105910707450',
-                payway:"微信支付",
-                amount:'20.00',
-                realPay:'18.00',
-                buyerInfo:"1822526252",
-                isTake:1,
-                cardPassword:12456
-            },
-        ]
+        dataSource: []
+    }
+    componentDidMount(){
+        this.getOrderList()
+    }
+    //获取订单列表
+    getOrderList(){
+        ajax({
+            url:'/orderController/getOrderList.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        })
     }
     //导出报表
     exportExcel(){
@@ -248,6 +207,8 @@ class OrderList extends Component {
         )
     }
 }
-
-export default Form.create()(OrderList);
+const mapStateToProps = state =>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(OrderList));
 

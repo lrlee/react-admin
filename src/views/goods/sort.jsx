@@ -1,7 +1,8 @@
 import React,{Component} from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import {Form,Button,Input,Table,Switch,Modal,message} from 'antd'
+import {connect} from 'react-redux';
+import {Form,Input,Table,Switch,Modal,message} from 'antd'
 import ajax from '@/utils/ajax'
 const SortStyle=styled.div`
     background:#fff;
@@ -31,6 +32,31 @@ const formItemLayout = {
     }
 }
 class EditSort extends Component {
+    //确定修改分类
+    modifySort(){
+    
+       this.props.form.validateFields((err,values)=>{
+            if(!err){
+                values.status?values.status=1:values.status=0
+                ajax({
+                    url:"/categoryController/editCategory.do",
+                    method:'post',
+                    data:values
+                }).then(res=>{
+                    message.success('修改成功')
+                    this.props.changeVisible(false)
+                    this.props.querySortList()
+                }).catch(err=>{
+                    message.error("修改失败")
+                })
+            }else{
+                message.error("修改失败")
+            }
+       })
+    } 
+    onChange(){
+        
+    }
     render(){
         const {editSortInfo,visible}=this.props
         const {getFieldDecorator} = this.props.form
@@ -38,37 +64,89 @@ class EditSort extends Component {
             <Modal
                 visible = {visible}
                 title='编辑分类'
-                onCancel={()=>this.setState({visible:false})}
-                onOk={()=>this.addSort()}
+                onCancel={()=>this.props.changeVisible(false)}
+                onOk={()=>this.modifySort()}
             >
-                <Form>
+                <Form {...formItemLayout}>
+                    <Form.Item label="分类id" style={{display:'none'}}>
+                        {getFieldDecorator('id',{
+                            initialValue:editSortInfo.id,
+                            rules:[{required:true,message:'请填写分类名称'}]
+                        })(<Input />)}
+                    </Form.Item>
                     <Form.Item label="分类名称">
-                        {getFieldDecorator('editSortName',{
-                            initialValue:editSortInfo.name,
+                        {getFieldDecorator('category_name',{
+                            initialValue:editSortInfo.category_name,
                             rules:[{required:true,message:'请填写分类名称'}]
                         })(<Input/>)}
                     </Form.Item>
                     <Form.Item label="排序">
-                        {getFieldDecorator('editSortRank',{
+                        {getFieldDecorator('sort',{
                             initialValue:editSortInfo.sort,
                         })(<Input/>)}
+                    </Form.Item>
+                    <Form.Item label="状态">
+                        {getFieldDecorator('status',{
+                        })(<Switch defaultChecked={editSortInfo.status?true:false} onChange={()=>this.onChange()} />)}
                     </Form.Item>
                 </Form> 
             </Modal>
         )
     }
 }
+const AddSortStyle=styled.div`
+    .addSortBtn{
+        line-height: 1.499;
+        position: relative;
+        display: inline-block;
+        font-weight: 400;
+        white-space: nowrap;
+        text-align: center;
+        background-image: none;
+        border: 1px solid transparent;
+        -webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+        cursor: pointer;
+        -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+        transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -ms-touch-action: manipulation;
+        touch-action: manipulation;
+        height: 32px;
+        padding: 0 15px;
+        font-size: 14px;
+        border-radius: 4px;
+        color: #fff;
+        background-color: #1890ff;
+        border-color: #1890ff;
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+        -webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+        &:hover{
+            color: #fff;
+            background-color: #40a9ff;
+            border-color: #40a9ff
+        }
+    }
+`;
 class AddSort extends Component {
     //添加分类
     addSort(e){
         e.preventDefault()
         this.props.form.validateFields((err,values)=>{
             if(!err){
+                values['bussinessId']=this.props.userInfo.businessId
                 ajax({
                     url:'/categoryController/saveCategory.do',
-                    params:values
+                    method:'post',
+                    data:values
                 }).then(res=>{
                     if(res.data.result){
+                        this.props.addSortSuccess()
+                        this.props.form.resetFields()
                         message.success(res.data.msg)
                     }else{
                         message.error(res.data.msg)
@@ -85,20 +163,22 @@ class AddSort extends Component {
     render(){
         const {getFieldDecorator} = this.props.form
         return(
-            <Form layout='inline' onSubmit={(e)=>this.addSort(e)}>
-                <Form.Item>
-                    {getFieldDecorator('category_name',{
-                        rules:[{required:true,message:'请填写分类名称'}]
-                    })(<Input placeholder="分类名称"/>)}
-                </Form.Item>
-                <Form.Item>
-                    {getFieldDecorator('sort')(<Input placeholder='排序'/>)}
-                </Form.Item>
-                <Form.Item>
-                    <input className='loginBtn' type="submit" value='添加分类'/>
-                    {/* <Button type="submit" >添加分类</Button> */}
-                </Form.Item>
-            </Form> 
+            <AddSortStyle>
+                <Form layout='inline' onSubmit={(e)=>this.addSort(e)}>
+                    <Form.Item>
+                        {getFieldDecorator('category_name',{
+                            rules:[{required:true,message:'请填写分类名称'}]
+                        })(<Input placeholder="分类名称"/>)}
+                    </Form.Item>
+                    <Form.Item>
+                        {getFieldDecorator('sort')(<Input placeholder='排序'/>)}
+                    </Form.Item>
+                    <Form.Item>
+                        <input className='addSortBtn' type="submit" value='添加分类'/>
+                        {/* <Button type="submit" >添加分类</Button> */}
+                    </Form.Item>
+                </Form> 
+            </AddSortStyle>
         )
     }
 }
@@ -119,7 +199,7 @@ class Sort extends Component {
         columns:[
             {
                 title:'分类名称',
-                dataIndex:'name'
+                dataIndex:'category_name'
             },
             {
                 title:'排序(值越大越排前)',
@@ -174,29 +254,7 @@ class Sort extends Component {
                 }
             }
         ],
-        dataSource:[
-            {
-                id:1,
-                name:'分类1',
-                sort:1,
-                status:0,
-                create_time:'2019-12-28'
-            },
-            {
-                id:2,
-                name:'分类2',
-                sort:0,
-                status:1,
-                create_time:'2019-12-28'
-            },
-            {
-                id:3,
-                name:'分类3',
-                sort:1,
-                status:1,
-                create_time:'2019-12-28'
-            }
-        ]
+        dataSource:[]
     }
     componentWillMount(){
         this.querySortList()
@@ -204,12 +262,19 @@ class Sort extends Component {
     handleChange(){
 
     }
+    changeVisible(flag){
+        this.setState({visible:flag})
+    }
+    //添加分类成功
+    addSortSuccess(){
+        this.querySortList()
+    }
     //查询分类
     querySortList(){
         ajax({
-            url:`/categoryController/getCategory.do?bussinessId=${window.bussionId}`
+            url:`/categoryController/getCategory.do?bussinessId=${this.props.userInfo && this.props.userInfo.businessId}`
         }).then(res=>{
-            console.log(res,"red")
+            this.setState({dataSource:res.data.data})
         }).catch(err=>{
             console.log(err,"eee")
         })
@@ -220,23 +285,35 @@ class Sort extends Component {
     }
     //删除分类
     deleteSort(data){
-        this.setState({deleteVisible:true})
+        this.setState({deleteVisible:true,deleteId:data.id})
     }
     //确定删除
     confirmDeleteSort(){
-
+        const {deleteId} = this.state
+        ajax({
+            url:"/categoryController/delCategory.do",
+            method:'post',
+            data:{
+                id:deleteId
+            }
+        }).then(res=>{
+            this.setState({deleteVisible:false})
+            this.querySortList()
+        }).catch(err=>{
+            message.error("删除失败")
+        })
     }
     render(){
         const {columns,dataSource,editSortInfo,visible,deleteVisible} = this.state
         return(
             <SortStyle>
                 <div className="addSort">
-                    <AddSortForm/>
+                    <AddSortForm addSortSuccess={()=>this.addSortSuccess()} />
                 </div>
                 <div className="sortList">
                     <Table dataSource={dataSource} columns={columns} />
                 </div>
-                <EditSortForm visible={visible} editSortInfo={editSortInfo}  />
+                <EditSortForm visible={visible} editSortInfo={editSortInfo} changeVisible={(flag)=>this.changeVisible(flag)} querySortList={()=>this.querySortList()} />
                 <Modal 
                     visible = {deleteVisible}
                     title='删除分类'
@@ -250,5 +327,7 @@ class Sort extends Component {
         )
     }
 }
-
-export default Sort;
+const mapStateToProps = state=>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps,null)(Sort);

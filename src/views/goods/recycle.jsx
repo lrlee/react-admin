@@ -1,21 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch, Modal } from 'antd';
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
+import { Form, Input, Select, Button, Table, Modal, message } from 'antd';
 
 const { Option } = Select;
-const { TextArea } = Input;
-const { Column, ColumnGroup } = Table;
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 },
-    },
-};
 const GooodListStyle = styled.div`
     padding:20px 0;
     background:#fff;
@@ -91,35 +81,29 @@ class RecycleList extends Component {
                 }
             }
         ],
-        dataSource: [
-            {
-                id: 1,
-                name: '分类1',
-                sort: 1,
-                status: 0,
-                create_time: '2019-12-28',
-                goodsName:"AAAAAAAA",
-                price:20.00,
-                code:'aaabbbb',
-                proxy_price:18,
-                inventory:5,
-                sale:1
-            },
-            {
-                id: 2,
-                name: '分类2',
-                sort: 0,
-                status: 1,
-                create_time: '2019-12-28'
-            },
-            {
-                id: 3,
-                name: '分类3',
-                sort: 1,
-                status: 1,
-                create_time: '2019-12-28'
+        dataSource: []
+    }
+    componentDidMount(){
+        this.getRecycleList()
+    }
+    //获取回收站列表
+    getRecycleList(){
+        ajax({
+            url:'/goodsController/getDelGoods.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
             }
-        ]
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({
+                    dataSource:res.data.data
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //删除分类
     deleteGoods(){
@@ -127,7 +111,7 @@ class RecycleList extends Component {
     }
     //确定删除
     confirmDelete(){
-        
+
     }
     //恢复分类
     restoreGoods(){
@@ -192,6 +176,8 @@ class RecycleList extends Component {
         )
     }
 }
-
-export default Form.create()(RecycleList);
+const mapStateToProps = state =>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(RecycleList));
 

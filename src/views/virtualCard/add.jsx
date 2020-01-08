@@ -1,6 +1,8 @@
 import React,{Component} from 'react';
 import styled from 'styled-components';
-import {Form,Input,Select,Radio,Button} from 'antd';
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
+import {Form,Input,Select,Radio,Button, message} from 'antd';
 const {Option} = Select
 const {TextArea} =Input
 const AddCardStyle = styled.div`
@@ -25,20 +27,74 @@ const formItemLayout = {
     },
 };
 class AddCard extends Component {
+    state={
+        goodsList:[]
+    }
+    componentDidMount(){
+        this.getGoodsList()
+    }
+    //获取商品列表
+    getGoodsList(){
+        ajax({
+            url:'/goodsController/getGoods.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({
+                    goodsList:res.data.data
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
+    //添加虚拟卡
+    addCard(){
+        this.props.form.validateFields((err,values)=>{
+            if(!err){
+                console.log(values,"valuse")
+                ajax({
+                    url:'/virtualCardController/addVirtualCard.do',
+                    method:'post',
+                    data:{
+                        goods_id:values.goods_id,
+                        virtualCard:[values.virtualCard]
+                    }
+                }).then(res=>{
+                    if(res.data.result){
+                        message.success(res.data.msg)
+                    }else{
+                        message.error(res.data.msg)
+                    }
+                }).catch(err=>{
+                    message.error(err.data.msg)
+                })
+            }
+        })
+    }
     render(){
         const {getFieldDecorator} = this.props.form
+        const {goodsList} = this.state
+        console.log(goodsList,"goods")
         return (
             <AddCardStyle>
                 <Form {...formItemLayout}>
                     <Form.Item label="选择商品">
                         {
-                            getFieldDecorator('goods',{
-                                initialValue:'1'
-                            })(
-                                <Select>
-                                    <Option value="1">11111</Option>
-                                    <Option value="2">22222</Option>
-                                </Select>
+                            goodsList.length && (
+                                getFieldDecorator('goods_id',{
+                                    initialValue:goodsList[0].id
+                                })(
+                                    <Select>
+                                        {
+                                            goodsList.map(v=><Option value={v.id}>{v.goods_name}</Option>)
+                                        }
+                                    </Select>
+                                )
                             )
                         }
                     </Form.Item>
@@ -75,7 +131,7 @@ class AddCard extends Component {
                     </Form.Item>
                     <Form.Item label="虚拟卡内容">
                         {
-                            getFieldDecorator('cardContent')(
+                            getFieldDecorator('virtualCard')(
                                 <TextArea row={4}/>
                             )
                         }
@@ -96,12 +152,14 @@ class AddCard extends Component {
 最多一次添加500张(500行)</span>
                     </Form.Item>
                     <Form.Item label="">
-                        <Button type="primary" style={{marginLeft:'20vw'}}>导入</Button>
+                        <Button type="primary" style={{marginLeft:'20vw'}} onClick={()=>this.addCard()}>导入</Button>
                     </Form.Item>
                 </Form>
             </AddCardStyle>
         )
     }
 }
-
-export default Form.create()(AddCard);
+const mapStateToProps = state=>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(AddCard));
