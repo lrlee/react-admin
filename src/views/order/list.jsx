@@ -125,6 +125,10 @@ class OrderList extends Component {
             params:{
                 bussinessId:this.props.userInfo.businessId
             }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({dataSource:res.data.data})             
+            }
         })
     }
     //导出报表

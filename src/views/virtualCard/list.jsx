@@ -39,6 +39,8 @@ const rowSelection = {
 };
 class CardList extends Component {
     state = {
+        //删除的虚拟卡id
+        deleteCardId:null,
         //删除虚拟卡弹框显隐
         deleteVisible:false,
         columns: [
@@ -83,7 +85,7 @@ class CardList extends Component {
                 render: (text, record) => {
                     return (
                         <div className="action_box">
-                            <span className="export_btn" onClick={()=>this.deleteCard()}>删除</span>
+                            <span className="export_btn" onClick={()=>this.deleteCard(record)}>删除</span>
                         </div>
                     )
                 }
@@ -118,12 +120,29 @@ class CardList extends Component {
         console.log('导出报表')
     }
     //删除分类
-    deleteCard(){
-        this.setState({deleteVisible:true})
+    deleteCard(data){
+        this.setState({deleteVisible:true,deleteCardId:data.id})
     }
     //确定删除
     confirmDelete(){
-
+        const {deleteCardId} = this.state
+        ajax({
+            url:'/virtualCardController/delVirtualCard.do',
+            method:'post',
+            data:{
+                virtual_card_id:deleteCardId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({deleteVisible:false,deleteCardId:null})
+                this.getCardList()
+                message.success(res.data.msg)
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     render() {
         const {columns,dataSource,deleteVisible}=this.state

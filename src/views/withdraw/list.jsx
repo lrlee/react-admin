@@ -1,20 +1,9 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch } from 'antd';
-
-const { Option } = Select;
-const { Column, ColumnGroup } = Table;
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 },
-    },
-};
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
+import { Form, Input, Select, Button, Table, Switch, message } from 'antd';
 const CardListStyle = styled.div`
     padding20px 0;
     background:#fff;
@@ -76,42 +65,32 @@ class WithdrawList extends Component {
                 dataIndex: 'pay_time'
             }
         ],
-        dataSource: [
-            {
-                id: 1,
-                apply_time:'2019-12-29 14:2:44',
-                amount: 25.00,
-                status: 0,
-                create_time: '2019-12-28',
-                fee:8.00,
-                realAmount:17.00,
-                pay_time:"2019-12-3 17:58:02"
-            },
-            {
-                id: 1,
-                apply_time:'2019-12-29 14:2:44',
-                amount: 25.00,
-                status: 0,
-                create_time: '2019-12-28',
-                fee:8.00,
-                realAmount:17.00,
-                pay_time:"2019-12-3 17:58:02"
-            },
-            {
-                id: 1,
-                apply_time:'2019-12-29 14:2:44',
-                amount: 25.00,
-                status: 0,
-                create_time: '2019-12-28',
-                fee:8.00,
-                realAmount:17.00,
-                pay_time:"2019-12-3 17:58:02"
-            },
-        ]
+        dataSource: []
+    }
+    componentDidMount(){
+        this.getApplyList()
+    }
+    //获取提现列表
+    getApplyList(){
+        ajax({
+            url:'/cashController/getCashList.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({
+                    dataSource:res.data.data
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     render() {
         const {columns,dataSource}=this.state
-        const { getFieldDecorator } = this.props.form;
         return (
             <CardListStyle>
                 <div className="top_action_box">
@@ -127,5 +106,8 @@ class WithdrawList extends Component {
     }
 }
 
-export default Form.create()(WithdrawList);
+const mapStateToProps = state=>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(WithdrawList))
 

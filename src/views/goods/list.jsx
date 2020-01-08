@@ -38,6 +38,10 @@ const rowSelection = {
 };
 class GoodsList extends Component {
     state = {
+        //分类列表
+        sortList:[],
+        //删除商品id
+        deleteGoodsId:null,
         //删除分类弹框显隐
         deletSortVisible:false,
         //清空分类弹框显隐
@@ -125,8 +129,8 @@ class GoodsList extends Component {
                                     title:'编辑商品'
                                 }
                             }}>编辑</Link>
-                            <span className="export_btn" onClick={()=>this.deleteGoods()}>删除</span>
-                            <span className="export_btn" onClick={()=>this.clearCard()}>清空虚拟卡</span>
+                            <span className="export_btn" onClick={()=>this.deleteGoods(record)}>删除</span>
+                            <span className="export_btn" onClick={()=>this.clearCard(record)}>清空虚拟卡</span>
                         </div>
                     )
                 }
@@ -136,9 +140,27 @@ class GoodsList extends Component {
     }
     componentDidMount(){
         this.getGoodsList()
+        this.getSortList()
     }
     handleChange(data,flag){
         console.log(data,flag,"flag")
+    }
+    //获取分类列表
+    getSortList(){
+        ajax({
+            url:'/categoryController/getCategory.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({sortList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //获取商品列表
     getGoodsList(){
@@ -166,8 +188,29 @@ class GoodsList extends Component {
         this.setState({clearSortVisible:true})
     }
     //删除商品
-    deleteGoods(){
-        this.setState({deletSortVisible:true})
+    deleteGoods(data){
+        console.log(data,"ataa")
+        this.setState({deletSortVisible:true,deleteGoodsId:data.id})
+    }
+    //确定删除商品
+    comDeleteGoods(){
+        const {deleteGoodsId} =this.state
+        ajax({
+            url:"/goodsController/delGoods.do",
+            method:'post',
+            data:{
+                goods_id:deleteGoodsId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                message.success(res.data.msg)
+                this.setState({
+                    deletSortVisible:false,
+                    deleteGoodsId:null
+                })
+                this.getGoodsList()
+            }
+        })
     }
     toAddGoods(){
         this.props.history.push({
@@ -175,20 +218,23 @@ class GoodsList extends Component {
         })
     }
     render() {
-        const {columns,dataSource,deletSortVisible,clearSortVisible}=this.state
+        const {columns,dataSource,deletSortVisible,clearSortVisible,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <GooodListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
-                            getFieldDecorator("sortName",{
+                            getFieldDecorator("category_id",{
                                 initialValue:'0'
                             })(
                                 <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部分类</Option>
-                                    <Option value="1">分类1</Option>
-                                    <Option value="2">分类2</Option>
+                                    {
+                                        sortList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }
@@ -224,7 +270,7 @@ class GoodsList extends Component {
                     visible={deletSortVisible}
                     title='删除分类'
                     onCancel={()=>this.setState({deletSortVisible:false})}
-                    onOk={()=>this.deleteGoods()}
+                    onOk={()=>this.comDeleteGoods()}
                 >
                     <p className="tips" style={{fontSize:'20px',textAlign:'center'}}>确定删除该商品吗？</p>
                     <p style={{fontSize:'14px',textAlign:'center'}}>删除的商品将进入回收站</p>

@@ -17,9 +17,6 @@ const columns = [
   { title: '支付通道', dataIndex: 'payway', key: 'payway' }
 ];
 class TableList extends Component {
-    state={
-        tableData:[]
-    }
     render(){
         return (
             <Table columns={columns} dataSource={this.props.data}  />
