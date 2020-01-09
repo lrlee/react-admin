@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom'
 import {connect} from 'react-redux'
 import ajax from '@/utils/ajax'
-import { Form, Input, Select, Button, Table, Switch ,DatePicker } from 'antd';
+import { Form, Input, Select, Button, Table ,DatePicker,message } from 'antd';
 const { Option } = Select;
 const {RangePicker } = DatePicker 
 const OrderListStyle = styled.div`
@@ -39,6 +39,8 @@ const rowSelection = {
 };
 class OrderList extends Component {
     state = {
+        //分类列表
+        sortList:[],
         columns: [
             {
                 title: '订单号',
@@ -117,6 +119,24 @@ class OrderList extends Component {
     }
     componentDidMount(){
         this.getOrderList()
+        this.getSortList()
+    }
+    //获取分类列表
+    getSortList(){
+        ajax({
+            url:'/categoryController/getCategory.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({sortList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //获取订单列表
     getOrderList(){
@@ -150,20 +170,23 @@ class OrderList extends Component {
 
     }
     render() {
-        const {columns,dataSource}=this.state
+        const {columns,dataSource,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <OrderListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
-                            getFieldDecorator("sortName",{
+                            getFieldDecorator("category_id",{
                                 initialValue:'0'
                             })(
-                                <Select style={{ width: '120px',marginRight:'10px'}}>
+                                <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部分类</Option>
-                                    <Option value="1">分类1</Option>
-                                    <Option value="2">分类2</Option>
+                                    {
+                                        sortList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }
@@ -209,7 +232,7 @@ class OrderList extends Component {
                 </div>
             </OrderListStyle>
         )
-    }
+    }     
 }
 const mapStateToProps = state =>({
     userInfo:state.user

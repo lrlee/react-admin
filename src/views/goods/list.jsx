@@ -189,7 +189,6 @@ class GoodsList extends Component {
     }
     //删除商品
     deleteGoods(data){
-        console.log(data,"ataa")
         this.setState({deletSortVisible:true,deleteGoodsId:data.id})
     }
     //确定删除商品

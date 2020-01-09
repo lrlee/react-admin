@@ -39,6 +39,8 @@ const rowSelection = {
 };
 class RecycleList extends Component {
     state = {
+        //分类列表
+        sortList:[],
         //恢复弹框显隐
         restoreVisivle:false,
         //删除弹框显隐
@@ -46,7 +48,7 @@ class RecycleList extends Component {
         columns: [
             {
                 title: '商品分类',
-                dataIndex: 'name'
+                dataIndex: 'category_name'
             },
             {
                 title: '排序(值越大越排前)',
@@ -54,11 +56,11 @@ class RecycleList extends Component {
             },
             {
                 title:'商品名称',
-                dataIndex:'goodsName'
+                dataIndex:'goods_name'
             },
             {
                 title:'价格',
-                dataIndex:'price'
+                dataIndex:'goods_price'
             },
             {
                 title: '创建时间',
@@ -85,6 +87,24 @@ class RecycleList extends Component {
     }
     componentDidMount(){
         this.getRecycleList()
+        this.getSortList()
+    }
+    //获取分类列表
+    getSortList(){
+        ajax({
+            url:'/categoryController/getCategory.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({sortList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //获取回收站列表
     getRecycleList(){
@@ -122,20 +142,23 @@ class RecycleList extends Component {
 
     }
     render() {
-        const {columns,dataSource,restoreVisivle,deleteVisible}=this.state
+        const {columns,dataSource,restoreVisivle,deleteVisible,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <GooodListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
-                            getFieldDecorator("sortName",{
+                            getFieldDecorator("category_id",{
                                 initialValue:'0'
                             })(
-                                <Select style={{ width: '120px'}}>
+                                <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部分类</Option>
-                                    <Option value="1">分类1</Option>
-                                    <Option value="2">分类2</Option>
+                                    {
+                                        sortList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }

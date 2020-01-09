@@ -39,6 +39,10 @@ const rowSelection = {
 };
 class CardList extends Component {
     state = {
+        //分类列表
+        sortList:[],
+        //商品列表
+        goodsList:[],
         //删除的虚拟卡id
         deleteCardId:null,
         //删除虚拟卡弹框显隐
@@ -95,6 +99,42 @@ class CardList extends Component {
     }
     componentDidMount(){
         this.getCardList()
+        this.getSortList()
+        this.getGoodsList()
+    }
+    //获取分类列表
+    getSortList(){
+        ajax({
+            url:'/categoryController/getCategory.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({sortList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
+    //获取商品列表
+    getGoodsList(){
+        ajax({
+            url:'/goodsController/getGoods.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({goodsList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //获取虚拟卡列表
     getCardList(){
@@ -145,31 +185,37 @@ class CardList extends Component {
         })
     }
     render() {
-        const {columns,dataSource,deleteVisible}=this.state
+        const {columns,dataSource,deleteVisible,sortList,goodsList}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <CardListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
-                            getFieldDecorator("sortName",{
+                            getFieldDecorator("category_id",{
                                 initialValue:'0'
                             })(
                                 <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部分类</Option>
-                                    <Option value="1">分类1</Option>
-                                    <Option value="2">分类2</Option>
+                                    {
+                                        sortList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }
                         {
-                            getFieldDecorator("goods",{
+                            getFieldDecorator("goods_id",{
                                 initialValue:'0'
                             })(
                                 <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部商品</Option>
-                                    <Option value="1">11111</Option>
-                                    <Option value="2">22222</Option>
+                                    {
+                                        goodsList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }
