@@ -52,27 +52,27 @@ class RecycleList extends Component {
         columns: [
             {
                 title: '商品分类',
-                dataIndex: 'name'
-            },
-            {
-                title: '排序(值越大越排前)',
-                dataIndex: 'sort'
+                dataIndex: 'category_name'
             },
             {
                 title:'商品名称',
-                dataIndex:'goodsName'
+                dataIndex:'goods_name'
             },
             {
-                title:'价格',
-                dataIndex:'price'
+                title:'商品价格',
+                dataIndex:'goods_price'
             },
             {
-                title: '创建时间',
-                dataIndex: 'create_time'
+                title:'卡号',
+                dataIndex:'virtual_card_num'
+            },
+            {
+                title:'卡密',
+                dataIndex:'virtual_card_password'
             },
             {
                 title: '删除时间',
-                dataIndex: 'delete_time'
+                dataIndex: 'del_time'
             },
             {
                 title: '操作',
@@ -142,10 +142,10 @@ class RecycleList extends Component {
     confirmDelete(){
         const {deleteCardId} = this.state
         ajax({
-            url:"/virtualCardController/getVirtualCard.do",
-            params:{
-                virtual_card_id:deleteCardId,
-                type:'del'
+            url:"/virtualCardController/removeVirtualCard.do",
+            method:'post',
+            data:{
+                virtual_card_id:deleteCardId
             }
         }).then(res=>{
             if(res.data.result){
