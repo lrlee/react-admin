@@ -1,6 +1,8 @@
 import React,{Component} from 'react';
 import styled from 'styled-components';
-import {Button} from 'antd';
+import {connect} from 'react-redux'
+import {Button, message} from 'antd';
+import ajax from '@/utils/ajax'
 const LinksStyle = styled.div`
     padding:20px;
     background:#fff;
@@ -23,7 +25,36 @@ const LinksStyle = styled.div`
 `;
 
 class StoreLinks extends Component {
+    state={
+        links:{
+
+        }
+    }
+    componentDidMount(){
+        this.getLinks()
+    }
+    //获取店铺链接
+    getLinks(){
+        ajax({
+            url:"/businessController/getUrlInfo.do",
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({
+                    links:res.data.web
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
     render(){
+        const {links} = this.state
+        console.log(this.props,"props")
         return (
             <LinksStyle>
                 <ul className="links_list">
@@ -61,5 +92,7 @@ class StoreLinks extends Component {
         )
     }
 }
-
-export default StoreLinks;
+const mapStateToProps = state =>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(StoreLinks);

@@ -1,6 +1,7 @@
 import React,{Component} from 'react';
 import styled from 'styled-components';
-import TableList from '@/components/table'
+import {Table, message} from 'antd'
+import {connect} from 'react-redux'
 import ajax from '@/utils/ajax'
 const LoginLogStyled = styled.div`
     padding:30px 10px 10px;
@@ -20,7 +21,17 @@ const LoginLogStyled = styled.div`
 class LoginLog extends Component {
     state={
         //登录日志
-        logList:[]
+        logList:[],
+        columns:[
+            {
+                title:'IP',
+                dataIndex:'login_ip'
+            },
+            {
+                title:'登录时间',
+                dataIndex:'login_time'
+            }
+        ]
     }
     componentDidMount(){
         this.getLogList()
@@ -31,25 +42,33 @@ class LoginLog extends Component {
             url:'/userController/loginLogs.do',
             method:'get',
             params:{
-                account:'lee1991'
+                account:this.props.userInfo.account
             }
         }).then(res=>{
-            this.setState({
-                logList:res.data.data
-            })
+            if(res.data.result){
+                this.setState({
+                    logList:res.data.data
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
         })
     }
     render(){
-        const {logList} = this.state
-        console.log(logList)
+        const {logList,columns} = this.state
         return(
             <LoginLogStyled>
                 <div className="loginLog_box">
                     <p className="title">只保留显示最近30天的登录日志</p>
-                    <TableList data={logList}/>
+                    <Table dataSource={logList} columns={columns}/>
                 </div>
             </LoginLogStyled>
         )
     }
 }
-export default LoginLog
+const mapStateToProps = state=>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(LoginLog)

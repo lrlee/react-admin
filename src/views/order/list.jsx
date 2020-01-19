@@ -44,9 +44,9 @@ class OrderList extends Component {
         columns: [
             {
                 title: '订单号',
-                dataIndex: 'orderNum',
+                dataIndex: 'order_code',
                 render:(text,record)=>{
-                    return <a>{record.orderNum}</a>
+                    return <a>{record.order_code}</a>
                 }
             },
             {
@@ -55,7 +55,7 @@ class OrderList extends Component {
             },
             {
                 title:'支付方式',
-                dataIndex:'payway'
+                dataIndex:'pay_type'
             },
             {
                 title:'总价',
@@ -67,7 +67,7 @@ class OrderList extends Component {
             },
             {
                 title:'购买者信息',
-                dataIndex:'buyerInfo'
+                dataIndex:'buyer_tel'
             },
             {
                 title:'状态',
@@ -82,9 +82,9 @@ class OrderList extends Component {
             },
             {
                 title: '取卡状态',
-                dataIndex: 'isTake',
+                dataIndex: 'take_status',
                 render:(text,record)=>{
-                    if(record.status){
+                    if(record.take_status){
                         return '已取卡'
                     }else{
                         return '未取卡'
@@ -93,11 +93,11 @@ class OrderList extends Component {
             },
             {
                 title: '取卡密码',
-                dataIndex: 'cardPassword'
+                dataIndex: 'take_password'
             },
             {
                 title:'交易时间',
-                dataIndex:'pay_time'
+                dataIndex:'trading_time'
             },
             {
                 title: '操作',

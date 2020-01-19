@@ -9,6 +9,7 @@ export default (
 )=>{
     switch(action.type){
         case USER_INFO:
+            console.log(action,"action")
             return {...state,user:action.payload}
         default:
             return state;

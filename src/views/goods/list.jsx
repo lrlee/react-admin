@@ -29,7 +29,7 @@ const GooodListStyle = styled.div`
 `;
 const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        
     },
     getCheckboxProps: record => ({
         disabled: record.name === 'Disabled User', // Column configuration not to be checked
@@ -46,6 +46,8 @@ class GoodsList extends Component {
         deletSortVisible:false,
         //清空分类弹框显隐
         clearSortVisible:false,
+        //选中的商品id
+        selectGooodsIds:[],
         columns: [
             {
                 title: '商品分类',
@@ -145,6 +147,9 @@ class GoodsList extends Component {
     handleChange(data,flag){
         console.log(data,flag,"flag")
     }
+    selectChange=(selectedRowKeys,selectedRows)=>{
+       this.setState({selectGooodsIds:selectedRows.map(v=>v.id)})
+    }
     //获取分类列表
     getSortList(){
         ajax({
@@ -216,9 +221,16 @@ class GoodsList extends Component {
             pathname:'/goods/add'
         })
     }
+    //批量删除
+    batchDelete(){
+        const {selectGooodsIds} = this.state
+    }
     render() {
         const {columns,dataSource,deletSortVisible,clearSortVisible,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
+        const rowSelection ={
+            onChange:this.selectChange
+        }
         return (
             <GooodListStyle>
                 <div className="top_action_box">
@@ -258,7 +270,7 @@ class GoodsList extends Component {
                     </div>
                     <div className="right_box">
                         <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default" onClick={()=>this.exportExcel()}>导出</Button>
-                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
+                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default" onClick={()=>this.batchDelete()}>批量删除</Button>
                         <Button type="danger" className="btn btn-large btn-block btn-default" onClick={()=>this.toAddGoods()}>添加商品</Button>
                     </div>
                 </div>

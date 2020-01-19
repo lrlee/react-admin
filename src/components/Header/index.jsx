@@ -1,6 +1,7 @@
 import React,{Component} from 'react';
 import {withRouter} from 'react-router-dom'
 import styled from 'styled-components';
+import {connect} from 'react-redux'
 import {Icon} from 'antd'
 const HeaderStyle = styled.div`
     .header_container{
@@ -33,7 +34,6 @@ const HeaderStyle = styled.div`
 `;
 class HeaderNav extends Component {
     render(){
-        console.log(this.props.location,"lo")
         return (
             <HeaderStyle>
                 <div className="header_container">
@@ -46,10 +46,10 @@ class HeaderNav extends Component {
                             $今日可提现: <span className="withdraw_amount">0.00</span><span className="withdraw_btn">提现</span>
                         </div>
                         <div className="balance_box">
-                            $未结余额: <span className="balance">0.00 </span>
+                            $未结余额: <span className="balance">{this.props.userInfo.amount} </span>
                         </div>
                         <div className="merchant_group">
-                            商户群<span className="group">226044934</span>
+                            商户群<span className="group">{this.props.userInfo.qq_group}</span>
                         </div>
                         <div className="reset">
                             <span><Icon type="setting"/>设置</span>
@@ -64,5 +64,7 @@ class HeaderNav extends Component {
         )
     }
 }
-
-export default  withRouter(HeaderNav);
+const mapStateToProps=state=>({
+    userInfo:state.user
+})
+export default  connect(mapStateToProps)(withRouter(HeaderNav))

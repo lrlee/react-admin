@@ -45,6 +45,8 @@ class RecycleList extends Component {
         restoreVisivle:false,
         //删除弹框显隐
         deleteVisible:false,
+        //选中的商品
+        selectGoodsIds:[],
         columns: [
             {
                 title: '商品分类',
@@ -76,8 +78,8 @@ class RecycleList extends Component {
                 render: (text, record) => {
                     return (
                         <div className="action_box">
-                            <span className="clear_btn" onClick={()=>this.restoreGoods()}>恢复</span>
-                            <span className="delete_btn" onClick={()=>this.deleteGoods()}>删除</span>
+                            <span className="clear_btn" onClick={()=>this.restoreGoods(record)}>恢复</span>
+                            <span className="delete_btn" onClick={()=>this.deleteGoods(record)}>删除</span>
                         </div>
                     )
                 }
@@ -103,7 +105,7 @@ class RecycleList extends Component {
                 message.error(res.data.msg)
             }
         }).catch(err=>{
-            message.error(err.data.msg)
+            message.error('接口报错')
         })
     }
     //获取回收站列表
@@ -122,28 +124,87 @@ class RecycleList extends Component {
                 message.error(res.data.msg)
             }
         }).catch(err=>{
-            message.error(err.data.msg)
+            message.error('接口报错')
         })
     }
     //删除分类
-    deleteGoods(){
-        this.setState({deleteVisible:true})
+    deleteGoods(data){
+        const {selectGoodsIds}= this.state
+        if(data){
+            this.setState({deleteVisible:true,selectGoodsIds:[data.id]})
+        }else{
+            if(!selectGoodsIds.length){
+                message.info("请选择要删除的商品")
+                return false;
+            }
+            this.setState({deleteVisible:true})
+        }
+        
     }
     //确定删除
     confirmDelete(){
-
+        const {selectGoodsIds}= this.state
+        ajax({
+            url:'/goodsController/removeGoods.do',
+            method:'post',
+            data:{
+                goods_id:selectGoodsIds
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({deleteVisible:false,selectGoodsIds:[]})
+                this.getRecycleList()
+                message.success(res.data.msg)
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error('接口报错')
+        })
     }
-    //恢复分类
-    restoreGoods(){
-        this.setState({restoreVisivle:true})
+    //恢复
+    restoreGoods(data){
+        const {selectGoodsIds}= this.state
+        if(data){
+            this.setState({restoreVisivle:true,selectGoodsIds:[data.id]})
+        }else{
+            if(!selectGoodsIds.length){
+                message.info("请选择要恢复的商品")
+                return false;
+            }
+            this.setState({restoreVisivle:true})
+        }
     }
     //确定恢复
     confirmRestore(){
-
+        const {selectGoodsIds}= this.state
+        ajax({
+            url:'/goodsController/recoveryDelGoods.do',
+            method:'post',
+            data:{
+                goods_id:selectGoodsIds
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({restoreVisivle:false,selectGoodsIds:[]})
+                this.getRecycleList()
+                message.success(res.data.msg)
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error('接口报错')
+        })
+    }
+    selectChange=(selectedRowKeys,selectedRows)=>{
+        this.setState({selectGoodsIds:selectedRows.map(v=>v.id)})
     }
     render() {
         const {columns,dataSource,restoreVisivle,deleteVisible,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
+        const rowSelection = {
+            onChange:this.selectChange
+        }
         return (
             <GooodListStyle>
                 <div className="top_action_box">
@@ -171,8 +232,8 @@ class RecycleList extends Component {
                         <Button type="primary" className="btn btn-large btn-block btn-default">搜索</Button>
                     </div>
                     <div className="right_box">
-                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量恢复</Button>
-                        <Button type="danger" className="btn btn-large btn-block btn-default">批量删除</Button>
+                        <Button type="primary" onClick={()=>this.restoreGoods()} style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量恢复</Button>
+                        <Button type="danger" onClick={()=>this.deleteGoods()} className="btn btn-large btn-block btn-default">批量删除</Button>
                     </div>
                 </div>
                 <div className="table_list_box">
@@ -190,7 +251,7 @@ class RecycleList extends Component {
                     visible={deleteVisible}
                     title='删除商品'
                     onCancel={()=>this.setState({deleteVisible:false})}
-                    onOk={this.confirmDelete()}
+                    onOk={()=>this.confirmDelete()}
                 >
                     <p style={{fontSize:'20px',textAlign:'center'}}>确定删除该商品吗？</p>
                     <p style={{fontSize:'14px',textAlign:'center'}}>删除后将不可恢复</p>

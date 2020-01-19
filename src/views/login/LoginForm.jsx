@@ -72,10 +72,14 @@ class LoginForm extends React.Component {
           method:'post',
           data:values
         }).then(res=>{
+          console.log(res,"rrrrr")
           if(res.data.result){
+            const obj = res.data
+            obj['businessId'] = res.data.data.businessId
             sessionStorage.setItem("token",res.data.access_token)
-            sessionStorage.setItem("userInfo",JSON.stringify(res.data.data))
-            this.props.setUserInfo(res.data.data)
+            console.log(obj,"obj")
+            sessionStorage.setItem("userInfo",JSON.stringify(obj))
+            this.props.setUserInfo(obj)
             const {from} =  {from: {pathname: '/'}}
             this.props.history.push(from)
             message.success(res.data.msg)
@@ -83,6 +87,7 @@ class LoginForm extends React.Component {
             message.error(res.data.msg)
           }
         }).catch(err=>{
+          console.log(err,"errr")
           message.err(err)
         })
       }else{

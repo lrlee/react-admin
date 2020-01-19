@@ -28,22 +28,11 @@ const GooodListStyle = styled.div`
         }
     }
 `;
-const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    getCheckboxProps: record => ({
-        disabled: record.name === 'Disabled User', // Column configuration not to be checked
-        name: record.name,
-    }),
-};
 class RecycleList extends Component {
     state = {
         //分类数据
         sortList:[],
-        //恢复虚拟卡id
-        restoreCardId:null,
-        deleteCardId:null,
+        selectCardIds:[],
         //删除虚拟卡
         deleteVisible:false,
         restoreVisible:false,
@@ -132,57 +121,85 @@ class RecycleList extends Component {
         })
     }
     //删除分类
-    deleteCard(record){
-        this.setState({deleteVisible:true,deleteCardId:record.id})
+    deleteCard(data){
+        const {selectCardIds} = this.state
+        if(data){
+            this.setState({deleteVisible:true,selectCardIds:[data.id]})
+        }else{
+            if(!selectCardIds.length){
+                message.info("请选择要删除的虚拟卡")
+                return false;
+            }
+            this.setState({
+                deleteVisible:true
+            })
+        }
+        
     }
     //恢复分类
     restoreCard(data){
-        this.setState({restoreVisible:true,restoreCardId:data.id})
+        const {selectCardIds} = this.state
+        if(data){
+            this.setState({restoreVisible:true,selectCardIds:[data.id]})
+        }else{
+            if(!selectCardIds.length){
+                message.info("请徐泽要恢复的虚拟卡")
+                return false;
+            }
+            this.setState({restoreVisible:true})
+        }
+        
     }
     confirmDelete(){
-        const {deleteCardId} = this.state
+        const {selectCardIds} = this.state
         ajax({
             url:"/virtualCardController/removeVirtualCard.do",
             method:'post',
             data:{
-                virtual_card_id:deleteCardId
+                virtual_card_id:selectCardIds
             }
         }).then(res=>{
             if(res.data.result){
                 message.success(res.data.msg)
                 this.setState({
                     deleteVisible:false,
-                    deleteCardId:null
+                    selectCardIds:[]
                 })
                 this.getRecycleList()
             }
         }).catch(err=>{
-            message.error(err.data.msg)
+            message.error('删除接口出错')
         })
     }
     confirmRestore(){
-        const {restoreCardId} = this.state
+        const {selectCardIds} = this.state
         ajax({
             url:'/virtualCardController/recoveryVirtualCard.do',
             method:'post',
             data:{
-                virtual_card_id:restoreCardId
+                virtual_card_id:selectCardIds
             }
         }).then(res=>{
             if(res.data.result){
                 message.success(res.data.msg)
-                this.setState({restoreVisible:false,restoreCardId:null})
+                this.setState({restoreVisible:false,selectCardIds:[]})
                 this.getRecycleList()
             }else{
                 message.error(res.data.msg)
             }
         }).catch(err=>{
-            message.error(err.data.msg)
+            message.error('恢复接口报错')
         })
+    }
+    selectChange=(selectedRowKeys,selectedRows)=>{
+        this.setState({selectCardIds:selectedRows.map(v=>v.id)})
     }
     render() {
         const {columns,dataSource,deleteVisible,restoreVisible,clearRecycleVisible,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
+        const rowSelection = {
+            onChange:this.selectChange
+        }
         return (
             <GooodListStyle>
                 <div className="top_action_box">
@@ -210,9 +227,9 @@ class RecycleList extends Component {
                         <Button type="primary" className="btn btn-large btn-block btn-default">搜索</Button>
                     </div>
                     <div className="right_box">
-                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量恢复</Button>
-                        <Button type="danger"  style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
-                        <Button type="danger" onClick={()=>this.clearRecycle()} className="btn btn-large btn-block btn-default">清空回收站</Button>
+                        <Button type="primary" onClick={()=>this.restoreCard()} style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量恢复</Button>
+                        <Button type="danger"  onClick={()=>this.deleteCard()} style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
+                        <Button type="danger"  onClick={()=>this.clearRecycle()} className="btn btn-large btn-block btn-default">清空回收站</Button>
                     </div>
                 </div>
                 <div className="table_list_box">
