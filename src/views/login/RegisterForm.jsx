@@ -123,14 +123,14 @@ class RegisterForm extends React.Component {
               validateFirst: true,
               rules: [
                 {required: true, message: '请输入电话号码'},
-                {pattern: '^[^ ]+$', message: '请输入电话号码'}
+                {pattern: '/^[1][3,4,5,6,7,8,9][0-9]{9}$/', message: '请输入11位电话号码'}
               ]
             })(
               <Input
                 onFocus={() => this.setState({focusItem: 1})}
                 onBlur={() => this.setState({focusItem: -1})}
                 type='text'
-                maxLength={16}
+                maxLength={11}
                 placeholder='电话号码'
                 addonBefore={<span className='iconfont icon-suo1' style={focusItem === 1 ? styles.focus : {}}/>}/>
             )}
@@ -140,14 +140,14 @@ class RegisterForm extends React.Component {
               validateFirst: true,
               rules: [
                 {required: true, message: '请输入qq号'},
-                {pattern: '^[^ ]+$', message: '请输入qq号'}
+                {pattern: '/^[1-9][0-9]{4,11}$/', message: '请输入qq号'}
               ]
             })(
               <Input
                 onFocus={() => this.setState({focusItem: 1})}
                 onBlur={() => this.setState({focusItem: -1})}
                 type='text'
-                maxLength={16}
+                maxLength={11}
                 placeholder='qq号'
                 addonBefore={<span className='iconfont icon-suo1' style={focusItem === 1 ? styles.focus : {}}/>}/>
             )}
@@ -157,14 +157,13 @@ class RegisterForm extends React.Component {
               validateFirst: true,
               rules: [
                 {required: true, message: '请输入邮箱'},
-                {pattern: '^[^ ]+$', message: '请输入邮箱'}
+                {pattern: '/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/', message: '请输入邮箱'}
               ]
             })(
               <Input
                 onFocus={() => this.setState({focusItem: 1})}
                 onBlur={() => this.setState({focusItem: -1})}
                 type='text'
-                maxLength={16}
                 placeholder='邮箱'
                 addonBefore={<span className='iconfont icon-suo1' style={focusItem === 1 ? styles.focus : {}}/>}/>
             )}

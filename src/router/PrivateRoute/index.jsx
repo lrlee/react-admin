@@ -9,6 +9,12 @@ const PrivateRoute = ({component:Component,...rest})=>(
             !!isAuthenticated()?<Component {...props} />:<Redirect to={{pathname:'/login',state:{title:'登录'}}}/>
         )}
     />
+    // <Route
+    //     {...rest}
+    //     render={(props)=>(
+    //         <Component {...props} />
+    //     )}
+    // />
 )
 
 export default PrivateRoute

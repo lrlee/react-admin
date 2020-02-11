@@ -28,20 +28,24 @@ class LoginLog extends Component {
     //获取登录日志
     getLogList(){
         ajax({
+<<<<<<< HEAD
             url:'/userController/loginLogs.do?account=lee1991',
+=======
+            url:'/userController/loginLogs.do',
+>>>>>>> 310310aa2c10b6b2288d339143e98341148abb98
             method:'get',
             params:{
                 account:'lee1991'
             }
         }).then(res=>{
             this.setState({
-                logList:res.data
+                logList:res.data.data
             })
         })
     }
     render(){
-        // console.log(bussion,"window")
         const {logList} = this.state
+        console.log(logList)
         return(
             <LoginLogStyled>
                 <div className="loginLog_box">

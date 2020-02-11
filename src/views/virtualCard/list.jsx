@@ -1,20 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch, Modal } from 'antd';
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
+import { Form, Select, Button, Table, Modal, message } from 'antd';
 
 const { Option } = Select;
-const { Column, ColumnGroup } = Table;
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 },
-    },
-};
 const CardListStyle = styled.div`
     padding20px 0;
     background:#fff;
@@ -48,28 +39,34 @@ const rowSelection = {
 };
 class CardList extends Component {
     state = {
+        //分类列表
+        sortList:[],
+        //商品列表
+        goodsList:[],
+        //删除的虚拟卡id
+        deleteCardId:null,
         //删除虚拟卡弹框显隐
         deleteVisible:false,
         columns: [
             {
                 title: '商品分类',
-                dataIndex: 'name'
+                dataIndex: 'category_name'
             },
             {
                 title: '商品名称',
-                dataIndex: 'goodsName'
+                dataIndex: 'goods_name'
             },
             {
                 title:'商品价格',
-                dataIndex:'price'
+                dataIndex:'goods_price'
             },
             {
                 title:'卡号',
-                dataIndex:'cardNum'
+                dataIndex:'virtual_card_num'
             },
             {
                 title:'卡密',
-                dataIndex:'cardPassword'
+                dataIndex:'virtual_card_password'
             },
             {
                 title:'状态',
@@ -92,80 +89,133 @@ class CardList extends Component {
                 render: (text, record) => {
                     return (
                         <div className="action_box">
-                            <span className="export_btn" onClick={()=>this.deleteCard()}>删除</span>
+                            <span className="export_btn" onClick={()=>this.deleteCard(record)}>删除</span>
                         </div>
                     )
                 }
             }
         ],
-        dataSource: [
-            {
-                id: 1,
-                name: '分类1',
-                sort: 1,
-                status: 0,
-                create_time: '2019-12-28',
-                goodsName:"AAAAAAAA",
-                price:20.00,
-                code:'aaabbbb',
-                proxy_price:18,
-                inventory:5,
-                sale:1
-            },
-            {
-                id: 2,
-                name: '分类2',
-                sort: 0,
-                status: 1,
-                create_time: '2019-12-28'
-            },
-            {
-                id: 3,
-                name: '分类3',
-                sort: 1,
-                status: 1,
-                create_time: '2019-12-28'
+        dataSource: []
+    }
+    componentDidMount(){
+        this.getCardList()
+        this.getSortList()
+        this.getGoodsList()
+    }
+    //获取分类列表
+    getSortList(){
+        ajax({
+            url:'/categoryController/getCategory.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
             }
-        ]
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({sortList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
+    //获取商品列表
+    getGoodsList(){
+        ajax({
+            url:'/goodsController/getGoods.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({goodsList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
+    //获取虚拟卡列表
+    getCardList(){
+        ajax({
+            url:'/virtualCardController/getVirtualCard.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({
+                    dataSource:res.data.data
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //导出报表
     exportExcel(){
         console.log('导出报表')
     }
     //删除分类
-    deleteCard(){
-        this.setState({deleteVisible:true})
+    deleteCard(data){
+        this.setState({deleteVisible:true,deleteCardId:data.id})
     }
     //确定删除
     confirmDelete(){
-        
+        const {deleteCardId} = this.state
+        ajax({
+            url:'/virtualCardController/delVirtualCard.do',
+            method:'post',
+            data:{
+                virtual_card_id:deleteCardId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({deleteVisible:false,deleteCardId:null})
+                this.getCardList()
+                message.success(res.data.msg)
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     render() {
-        const {columns,dataSource,deleteVisible}=this.state
+        const {columns,dataSource,deleteVisible,sortList,goodsList}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <CardListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
-                            getFieldDecorator("sortName",{
+                            getFieldDecorator("category_id",{
                                 initialValue:'0'
                             })(
                                 <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部分类</Option>
-                                    <Option value="1">分类1</Option>
-                                    <Option value="2">分类2</Option>
+                                    {
+                                        sortList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }
                         {
-                            getFieldDecorator("goods",{
+                            getFieldDecorator("goods_id",{
                                 initialValue:'0'
                             })(
                                 <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部商品</Option>
-                                    <Option value="1">11111</Option>
-                                    <Option value="2">22222</Option>
+                                    {
+                                        goodsList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }
@@ -205,6 +255,8 @@ class CardList extends Component {
         )
     }
 }
-
-export default Form.create()(CardList);
+const mapStateToProps = state=>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(CardList));
 

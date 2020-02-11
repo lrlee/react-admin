@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { Form, Input, Select, Button } from 'antd';
-
+import { Form, Input, Select, Button, message } from 'antd';
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
 const { Option } = Select;
 const { TextArea } = Input;
 const formItemLayout = {
@@ -47,6 +48,22 @@ const UserSettingsStyled = styled.div`
 `;
 
 class UserSettings extends Component {
+    componentWillMount(){
+        this.getUserInfo()
+    }
+    //获取商户基本信息
+    getUserInfo(){
+        ajax({
+            url:'/businessController/getBusinessmanInfo.do',
+            params:{
+                bussinessId:this.props.userInfo && this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            console.log(res,"rrrrr")
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
     render() {
         const { getFieldDecorator } = this.props.form;
         return (
@@ -215,5 +232,7 @@ class UserSettings extends Component {
         )
     }
 }
-
-export default Form.create()(UserSettings);
+const mapStateToProps = state=>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps,null)(Form.create()(UserSettings));

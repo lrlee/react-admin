@@ -1,21 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch ,DatePicker } from 'antd';
-
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
+import { Form, Input, Select, Button, Table ,DatePicker,message } from 'antd';
 const { Option } = Select;
-const { Column, ColumnGroup } = Table;
 const {RangePicker } = DatePicker 
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 },
-    },
-};
 const OrderListStyle = styled.div`
     padding20px 0;
     background:#fff;
@@ -49,6 +39,8 @@ const rowSelection = {
 };
 class OrderList extends Component {
     state = {
+        //分类列表
+        sortList:[],
         columns: [
             {
                 title: '订单号',
@@ -123,50 +115,41 @@ class OrderList extends Component {
                 }
             }
         ],
-        dataSource: [
-            {
-                id: 1,
-                goodsName:'23244242(1张)',
-                status: 0,
-                pay_time: '2019-12-28',
-                sale:1,
-                orderNum:'T191229105910707450',
-                payway:"微信支付",
-                amount:'20.00',
-                realPay:'18.00',
-                buyerInfo:"1822526252",
-                isTake:1,
-                cardPassword:12456
-            },
-            {
-                id: 1,
-                goodsName:'23244242(1张)',
-                status: 0,
-                pay_time: '2019-12-28',
-                sale:1,
-                orderNum:'T191229105910707450',
-                payway:"微信支付",
-                amount:'20.00',
-                realPay:'18.00',
-                buyerInfo:"1822526252",
-                isTake:1,
-                cardPassword:12456
-            },
-            {
-                id: 1,
-                goodsName:'23244242(2张)',
-                status: 0,
-                pay_time: '2019-12-28',
-                sale:1,
-                orderNum:'T191229105910707450',
-                payway:"微信支付",
-                amount:'20.00',
-                realPay:'18.00',
-                buyerInfo:"1822526252",
-                isTake:1,
-                cardPassword:12456
-            },
-        ]
+        dataSource: []
+    }
+    componentDidMount(){
+        this.getOrderList()
+        this.getSortList()
+    }
+    //获取分类列表
+    getSortList(){
+        ajax({
+            url:'/categoryController/getCategory.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({sortList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
+    //获取订单列表
+    getOrderList(){
+        ajax({
+            url:'/orderController/getOrderList.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({dataSource:res.data.data})             
+            }
+        })
     }
     //导出报表
     exportExcel(){
@@ -187,20 +170,23 @@ class OrderList extends Component {
 
     }
     render() {
-        const {columns,dataSource}=this.state
+        const {columns,dataSource,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <OrderListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
-                            getFieldDecorator("sortName",{
+                            getFieldDecorator("category_id",{
                                 initialValue:'0'
                             })(
-                                <Select style={{ width: '120px',marginRight:'10px'}}>
+                                <Select style={{ width: '120px',marginRight:'20px'}}>
                                     <Option value="0">全部分类</Option>
-                                    <Option value="1">分类1</Option>
-                                    <Option value="2">分类2</Option>
+                                    {
+                                        sortList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
                                 </Select>
                             )
                         }
@@ -246,8 +232,10 @@ class OrderList extends Component {
                 </div>
             </OrderListStyle>
         )
-    }
+    }     
 }
-
-export default Form.create()(OrderList);
+const mapStateToProps = state =>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(OrderList));
 

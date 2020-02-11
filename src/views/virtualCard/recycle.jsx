@@ -1,21 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'
-import { Form, Input, Select, Button, Table, Switch, Modal } from 'antd';
-
+import { Form, Input, Select, Button, Table, Switch, Modal, message } from 'antd';
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
 const { Option } = Select;
 const { TextArea } = Input;
-const { Column, ColumnGroup } = Table;
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 },
-    },
-};
 const GooodListStyle = styled.div`
     padding:20px 0;
     background:#fff;
@@ -49,6 +39,11 @@ const rowSelection = {
 };
 class RecycleList extends Component {
     state = {
+        //分类数据
+        sortList:[],
+        //恢复虚拟卡id
+        restoreCardId:null,
+        deleteCardId:null,
         //删除虚拟卡
         deleteVisible:false,
         restoreVisible:false,
@@ -57,27 +52,27 @@ class RecycleList extends Component {
         columns: [
             {
                 title: '商品分类',
-                dataIndex: 'name'
-            },
-            {
-                title: '排序(值越大越排前)',
-                dataIndex: 'sort'
+                dataIndex: 'category_name'
             },
             {
                 title:'商品名称',
-                dataIndex:'goodsName'
+                dataIndex:'goods_name'
             },
             {
-                title:'价格',
-                dataIndex:'price'
+                title:'商品价格',
+                dataIndex:'goods_price'
             },
             {
-                title: '创建时间',
-                dataIndex: 'create_time'
+                title:'卡号',
+                dataIndex:'virtual_card_num'
+            },
+            {
+                title:'卡密',
+                dataIndex:'virtual_card_password'
             },
             {
                 title: '删除时间',
-                dataIndex: 'delete_time'
+                dataIndex: 'del_time'
             },
             {
                 title: '操作',
@@ -85,73 +80,125 @@ class RecycleList extends Component {
                 render: (text, record) => {
                     return (
                         <div className="action_box">
-                            <span className="clear_btn" onClick={()=>this.restoreCard()}>恢复</span>
-                            <span className="delete_btn" onClick={()=>this.deleteCard()}>删除</span>
+                            <span className="clear_btn" onClick={()=>this.restoreCard(record)}>恢复</span>
+                            <span className="delete_btn" onClick={()=>this.deleteCard(record)}>删除</span>
                         </div>
                     )
                 }
             }
         ],
-        dataSource: [
-            {
-                id: 1,
-                name: '分类1',
-                sort: 1,
-                status: 0,
-                create_time: '2019-12-28',
-                goodsName:"AAAAAAAA",
-                price:20.00,
-                code:'aaabbbb',
-                proxy_price:18,
-                inventory:5,
-                sale:1
-            },
-            {
-                id: 2,
-                name: '分类2',
-                sort: 0,
-                status: 1,
-                create_time: '2019-12-28'
-            },
-            {
-                id: 3,
-                name: '分类3',
-                sort: 1,
-                status: 1,
-                create_time: '2019-12-28'
+        dataSource: []
+    }
+    componentDidMount(){
+        this.getRecycleList()
+        this.getSortList()
+    }
+    //获取分类数据
+    getSortList(){
+        ajax({
+            url:'/categoryController/getCategory.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
             }
-        ]
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({
+                    sortList:res.data.data
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
+    //获取回收站列表
+    getRecycleList(){
+        ajax({
+            url:'/virtualCardController/getVirtualCard.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({
+                    dataSource:res.data.data
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //删除分类
-    deleteCard(){
-    this.setState({deleteVisible:true})
+    deleteCard(record){
+        this.setState({deleteVisible:true,deleteCardId:record.id})
     }
     //恢复分类
-    restoreCard(){
-        this.setState({restoreVisible:true})
+    restoreCard(data){
+        this.setState({restoreVisible:true,restoreCardId:data.id})
     }
     confirmDelete(){
-
+        const {deleteCardId} = this.state
+        ajax({
+            url:"/virtualCardController/removeVirtualCard.do",
+            method:'post',
+            data:{
+                virtual_card_id:deleteCardId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                message.success(res.data.msg)
+                this.setState({
+                    deleteVisible:false,
+                    deleteCardId:null
+                })
+                this.getRecycleList()
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     confirmRestore(){
-
+        const {restoreCardId} = this.state
+        ajax({
+            url:'/virtualCardController/recoveryVirtualCard.do',
+            method:'post',
+            data:{
+                virtual_card_id:restoreCardId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                message.success(res.data.msg)
+                this.setState({restoreVisible:false,restoreCardId:null})
+                this.getRecycleList()
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     render() {
-        const {columns,dataSource,deleteVisible,restoreVisible,clearRecycleVisible}=this.state
+        const {columns,dataSource,deleteVisible,restoreVisible,clearRecycleVisible,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
         return (
             <GooodListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
                         {
-                            getFieldDecorator("sortName",{
-                                initialValue:'0'
-                            })(
-                                <Select style={{ width: '120px'}}>
-                                    <Option value="0">全部分类</Option>
-                                    <Option value="1">分类1</Option>
-                                    <Option value="2">分类2</Option>
-                                </Select>
+                            sortList.length && (
+                                getFieldDecorator("sortName",{
+                                    initialValue:'0'
+                                })(
+                                    <Select style={{ width: '120px'}}>
+                                        <Option  value="0">全部分类</Option>
+                                        {
+                                            sortList.map(v=><Option key={v.id} value={v.id}>{v.category_name}</Option>)
+                                        }
+                                    </Select>
+                                )
                             )
                         }
                         {
@@ -202,5 +249,8 @@ class RecycleList extends Component {
     }
 }
 
-export default Form.create()(RecycleList);
+const mapStateToProps = state =>({
+    userInfo:state.user
+})
+export default connect(mapStateToProps)(Form.create()(RecycleList));
 
