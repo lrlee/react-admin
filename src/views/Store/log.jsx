@@ -28,9 +28,9 @@ class LoginLog extends Component {
     //获取登录日志
     getLogList(){
         ajax({
-            url:'/userController/loginLogs.do',
-            method:'post',
-            data:{
+            url:'/userController/loginLogs.do?account=lee1991',
+            method:'get',
+            params:{
                 account:'lee1991'
             }
         }).then(res=>{

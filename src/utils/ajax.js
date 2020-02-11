@@ -1,7 +1,6 @@
 import qs from 'qs';
 import axios from 'axios'
 let baseURL='http://122.51.163.202:8080'
-
 let service = axios.create({
     baseURL,
     //如果请求超过了'timeout'的时间，请求将被中断
@@ -9,9 +8,9 @@ let service = axios.create({
     //表示跨域请求时是否需要使用凭证
     // withCredentials:true,
     // crossDomain:true,
-    // headers: {
-    //     'Content-Type': "application/json;charset=utf-8"
-    // }
+    headers: {
+        'Authorization': sessionStorage.getItem("token")
+    }
 })
 
 //添加请求拦截器

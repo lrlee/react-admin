@@ -71,8 +71,8 @@ class LoginForm extends React.Component {
           data:values
         }).then(res=>{
           if(res.data.result){
-            
-            document.cookie=`sessionId=${res.data}`
+            document.cookie=`sessionId=${res.data.access_token}`
+            sessionStorage.setItem("token",res.data.access_token)
             const {from} =  {from: {pathname: '/'}}
             this.props.history.push(from)
             message.success(res.data.msg)
@@ -80,10 +80,10 @@ class LoginForm extends React.Component {
             message.error(res.data.msg)
           }
         }).catch(err=>{
-          message.err(err)
+          message.error(err)
         })
       }else{
-        message.err(err)
+        message.error(err)
       }
     })
   }
