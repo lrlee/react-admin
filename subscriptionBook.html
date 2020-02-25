@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .subscription_box{
+            padding: 5vw 10vw;
+        }
+        h1{
+            text-align: center;
+            font-size: 8vw;
+        }
+        p{
+            line-height: 1.5;
+        }
+        .subscription_box>p:not(:first-child){
+            text-indent: 8px;
+        }
+        .captNpm run 
+            border-top:1px solid #000;
+            border-bottom:1px solid #000;
+        }
+        .info_box>div{
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        input{
+            border:none;
+            outline: none;
+            border-bottom: 1px solid #000;
+        }
+        .amount{
+            font-style: normal;
+            text-decoration: underline;
+        }
+        .relation>div{
+            margin-top:10px;
+        }
+        .date>div{
+            display: flex;
+
+        }
+        .date>div>div{
+            width:33.3%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="subscription_box">
+        <h1>招商玺荟购买意向书<i></i></h1>
+        <p class="title">成都招商远康房地产开发有限公司</p>
+        <p class="part1">本人/公司有意认购贵公司开发的招商.玺荟项目,希望贵公司在正式推出该类房源时，能提前通知本人/公司，以便签订《商品房认购书》(一下简称《认购书》)</p>
+        <p class="part2">为表达诚意,本人/公司自愿交人民币(大写)<i class="amount">1000</i>元整作为诚意登记费。该诚意登记费在签订《认购书》后，将转为《认购书》约定的立约定金；若本人/公司未成功签订《认购书》，请贵公司将本人/公司已交诚意登记费免息退还，此后双方不再追究对方任何责任。</p>
+        <p class="part3">特此申请</p>
+        <p class="part4">申明：本人/公司愿意遵守贵公司之销售安排和规定。</p>
+        <div class="caption">
+            <p class="sub_title">特别说明：</p>
+            <p>1.本人/公司认可本《招商.玺荟购买意向书》（一下简称《购买意向函数》）一式贰份，并认可该《购买意向书》的相关内容。</p>
+            <p>2.本人/公司须凭诚意登记申请人身份证等有效证件、诚意金收据及本《购买意向书》换取定金收据，与贵公司签订《认购书》。</p>
+            <p>3.本人/公司自愿遵守《购买意向书》与《认购书》壹对壹的规定，并保证《认购书》、《商品房买卖合同》与本《购买意向书》名字、名称、联系方式及地址一致，但贵公司书面认可的除外。</p>
+            <p>4.本人/公司认可贵公司关于诚意登记申请不可转让的规定，一个诚意金仅可认购一个招商大魔方玺荟；不能直系更名和增加共有人，否则贵公司有权宣布本人/公司诚意登记申请无效，并请按第7条返还诚意登记费。</p>
+            <p>5.本人/公司认可贵公司以电话、手机短信、信函、报纸、广告任一方式作为通知本人/公司关于招商项目正式发售的有效方式。本《购买意向书》签订后，若本人/公司通讯地址及联系方式发生变化，要及时通知贵公司，否则自愿承担由此产生的全部后果。</p>
+            <p>6.本人/公司认可贵公司关于正式发售（开盘）当日相应优惠的规定及解释。</p>
+            <p>7.本人/公司放弃“诚意登记申请”及退还诚意登记费的方法：本人/公司在正式发售（开盘）当日如未签订《认购书》，即表示自动放弃诚意登记申请，于正式开盘次日起，本人/公司可凭此《购买意向书》及诚意登记费收据到贵公司销售现场填写《诚意金退款申请》，请贵公司在本人/公司递交申请后的三十个工作日内退还诚意登记费（不计利息）。</p>
+            <p>8.本人/公司认可贵公司在开盘当天确定的选房方式。</p>
+            <p>9.本人/公司认可成都招商远康房地产开发有限公司有权对本《购买意向书》内容进行解释。</p>
+            <p>10.本协议仅用于购买本项目招商大魔方玺荟诚意金排号使用。</p>
+        </div>
+        <div class="info_box">
+            <div class="name">
+                <span>申请人姓名:</span><input/> 
+            </div>
+            <div class="sex">
+                <span>女士/先生:</span><input/>
+            </div>
+            <div class="card_number">
+                <span>申请人证件号码:</span><input/>
+            </div>
+            <div class="relation">
+                <span>申请人联系方式:</span>
+                <div>手机<input/></div>
+                <div>座机<input/></div>
+            </div>
+            <div class="address">
+                <span>申请人地址:</span><input/>
+            </div>
+            <div class="home">
+                <span>置业顾问:</span><input/>
+            </div>
+        </div>
+        <div class="user_signature">
+            <div class="signature">
+                <div>申请人签名（手印）:</div><input/>
+            </div>
+            <div class="date">
+                <span>申请日期:</span>
+                <div>
+                    <div><input/><span>年</span></div>
+                    <div><input/><span>月</span></div>
+                    <div><input/><span>日</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -5,7 +5,7 @@ import {connect} from 'react-redux'
 import { Form, Input, Row, Col, message } from 'antd'
 import PromptBox from '@/components/PromptBox'
 import ajax from '@/utils/ajax'
-import { actionUserInfo } from './store/action'
+import { actionUserInfo,actionNavInfo } from './store/action'
 class LoginForm extends React.Component {
   state = {
     focusItem: -1,   //保存当前聚焦的input
@@ -73,14 +73,11 @@ class LoginForm extends React.Component {
           data:values
         }).then(res=>{
           if(res.data.result){
-<<<<<<< HEAD
-            document.cookie=`sessionId=${res.data.access_token}`
-            sessionStorage.setItem("token",res.data.access_token)
-=======
             sessionStorage.setItem("token",res.data.access_token)
             sessionStorage.setItem("userInfo",JSON.stringify(res.data.data))
+            sessionStorage.setItem("navInfo",JSON.stringify(res.data))
             this.props.setUserInfo(res.data.data)
->>>>>>> 310310aa2c10b6b2288d339143e98341148abb98
+            this.props.setNavInfo(res.data)
             const {from} =  {from: {pathname: '/'}}
             this.props.history.push(from)
             message.success(res.data.msg)
@@ -186,6 +183,7 @@ const styles = {
   },
 }
 const mapDispatchToProps = dispatch=>({
-  setUserInfo:user=>dispatch(actionUserInfo(user))
+  setUserInfo:user=>dispatch(actionUserInfo(user)),
+  setNavInfo:navInfo=>dispatch(actionNavInfo(navInfo))
 })
 export default connect(null,mapDispatchToProps)(withRouter(Form.create()(LoginForm)))

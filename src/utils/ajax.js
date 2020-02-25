@@ -8,21 +8,14 @@ let service = axios.create({
     //表示跨域请求时是否需要使用凭证
     // withCredentials:true,
     // crossDomain:true,
-<<<<<<< HEAD
-    headers: {
-        'Authorization': sessionStorage.getItem("token")
-    }
-=======
     // headers: {
     //     'Authorization': sessionStorage.getItem("token")
     // }
->>>>>>> 310310aa2c10b6b2288d339143e98341148abb98
 })
 
 //添加请求拦截器
 service.interceptors.request.use(
     config=>{
-        console.log(config,"config")
         if(config.url.indexOf('userController/login.do')===-1){
             config.headers['Authorization']=sessionStorage.getItem("token")
         }

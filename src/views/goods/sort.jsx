@@ -87,7 +87,7 @@ class EditSort extends Component {
                     </Form.Item>
                     <Form.Item label="状态">
                         {getFieldDecorator('status',{
-                        })(<Switch defaultChecked={editSortInfo.status?true:false} onChange={()=>this.onChange()} />)}
+                        })(<Switch defaultChecked={editSortInfo.status && editSortInfo.status!=='0'?true:false} onChange={()=>this.onChange()} />)}
                     </Form.Item>
                 </Form> 
             </Modal>
@@ -209,10 +209,10 @@ class Sort extends Component {
                 title:'状态',
                 dataIndex:'status',
                 render:(text,record)=>{
-                    if(record.status){
-                        return <Switch defaultChecked onChange={this.handleChange} />
+                    if(record.status && record.status!=="0"){
+                        return <span className="status_text">已售出</span>
                     }else{
-                        return <Switch  onChange={this.handleChange} />
+                        return <span className="status_text">未售出</span>
                     }
                     
                 }
@@ -305,10 +305,11 @@ class Sort extends Component {
     }
     render(){
         const {columns,dataSource,editSortInfo,visible,deleteVisible} = this.state
+        const {userInfo} = this.props
         return(
             <SortStyle>
                 <div className="addSort">
-                    <AddSortForm addSortSuccess={()=>this.addSortSuccess()} />
+                    <AddSortForm userInfo={userInfo} addSortSuccess={()=>this.addSortSuccess()} />
                 </div>
                 <div className="sortList">
                     <Table dataSource={dataSource} columns={columns} />

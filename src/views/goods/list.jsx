@@ -27,21 +27,14 @@ const GooodListStyle = styled.div`
         }
     }
 `;
-const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    getCheckboxProps: record => ({
-        disabled: record.name === 'Disabled User', // Column configuration not to be checked
-        name: record.name,
-    }),
-};
+
 class GoodsList extends Component {
     state = {
         //分类列表
         sortList:[],
+        selectGoodsIds:[],
         //删除商品id
-        deleteGoodsId:null,
+        deleteGoodsIds:[],
         //删除分类弹框显隐
         deletSortVisible:false,
         //清空分类弹框显隐
@@ -93,9 +86,9 @@ class GoodsList extends Component {
                 key:9,
                 render:(text,record)=>{
                     if (record.status) {
-                        return <Switch defaultChecked onChange={this.handleChange} />
+                        return <Switch defaultChecked onChange={()=>this.handleChange(record)} />
                     } else {
-                        return <Switch  onChange={this.handleChange} />
+                        return <Switch  onChange={()=>this.handleChange(record)} />
                     }
                 }
             },
@@ -120,13 +113,16 @@ class GoodsList extends Component {
                             <Link to={{
                                 pathname:'/card/add',
                                 state:{
-                                    title:'添加虚拟卡'
+                                    title:'添加虚拟卡',
+                                    goodsId:record.id
                                 }
                             }}>加卡</Link>
                             <Link to={{
                                 pathname:'/goods/add',
                                 state:{
-                                    title:'编辑商品'
+                                    title:'编辑商品',
+                                    categoryId:record.category_id,
+                                    goodsId:record.id
                                 }
                             }}>编辑</Link>
                             <span className="export_btn" onClick={()=>this.deleteGoods(record)}>删除</span>
@@ -142,8 +138,22 @@ class GoodsList extends Component {
         this.getGoodsList()
         this.getSortList()
     }
-    handleChange(data,flag){
-        console.log(data,flag,"flag")
+    handleChange(data){
+        ajax({
+            url:'goodsController/changeStatus.do',
+            method:'post',
+            data:{
+                id:data.id
+            }
+        }).then(res=>{
+            if(res.data.result){
+                message.success(res.data.msg)
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
     }
     //获取分类列表
     getSortList(){
@@ -181,7 +191,66 @@ class GoodsList extends Component {
     }
     //导出报表
     exportExcel(){
-        console.log('导出报表')
+        const {selectGoodsIds} = this.state
+        if(!selectGoodsIds.length){
+            message.warning("请选择需要导出的数据")
+            return;
+        }
+        fetch('http://122.51.163.202:8080/goodsController/exportGoods.do', {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization':sessionStorage.getItem("token")
+            },
+            responseType: 'blob',
+            body: JSON.stringify(selectGoodsIds),
+        }).then(res => res.blob()).then(data => {
+            let blobUrl = window.URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.download = '商品表.xls';
+            a.href = blobUrl;
+            a.click();
+        })
+        // ajax({
+        //     url:'/goodsController/exportGoods.do',
+        //     method:'post',
+        //     data:selectGoodsIds
+        // }).then(res=>{
+        //     console.log(res,"ssdddd")
+        //   //  window.open(res.data.data)
+        //   this.download(res.data.data)
+        // }).catch(err=>{
+        //     message.error(err.data.msg)
+        // })
+    }
+    download(filename){
+        var oReq = new XMLHttpRequest();
+        oReq.open("GET", 'http://122.51.163.202:8080/goodsController/exportGoods.do', true);
+        oReq.responseType = "blob";
+        oReq.onload = function (oEvent) {
+            var content = oReq.response;
+            console.log(oEvent,"")
+            var elink = document.createElement('a');
+            elink.download = filename;
+            elink.style.display = 'none';
+
+            var blob = new Blob([content]);
+            elink.href = URL.createObjectURL(blob);
+
+            document.body.appendChild(elink);
+            elink.click();
+
+            document.body.removeChild(elink);
+        };
+    }
+    //批量删除
+    batchDeletion(){
+        const {selectGoodsIds} = this.state
+        if(!selectGoodsIds.length){
+            message.warning("请选择需要删除的数据")
+            return;
+        }
+        this.setState({deletSortVisible:true,deleteGoodsIds:selectGoodsIds})
     }
     //清空虚拟卡
     clearCard(){
@@ -189,23 +258,20 @@ class GoodsList extends Component {
     }
     //删除商品
     deleteGoods(data){
-        this.setState({deletSortVisible:true,deleteGoodsId:data.id})
+        this.setState({deletSortVisible:true,deleteGoodsIds:[data.id]})
     }
     //确定删除商品
     comDeleteGoods(){
-        const {deleteGoodsId} =this.state
+        const {deleteGoodsIds} =this.state
         ajax({
             url:"/goodsController/delGoods.do",
             method:'post',
-            data:{
-                goods_id:deleteGoodsId
-            }
+            data:deleteGoodsIds
         }).then(res=>{
             if(res.data.result){
                 message.success(res.data.msg)
                 this.setState({
-                    deletSortVisible:false,
-                    deleteGoodsId:null
+                    deletSortVisible:false
                 })
                 this.getGoodsList()
             }
@@ -216,49 +282,82 @@ class GoodsList extends Component {
             pathname:'/goods/add'
         })
     }
+    //搜索
+    search(e){
+        e.preventDefault()
+        this.props.form.validateFields((err,values)=>{
+            if(!err){
+                values['bussinessId']=this.props.userInfo.businessId
+                ajax({
+                    url:`/goodsController/getGoods.do?bussinessId=${values.bussinessId}&param=${values.param || ''}&category_name=${values.category_name}`,
+                }).then(res=>{
+                    if(res.data.result){
+                        console.log(res,"success")
+                        this.setState({
+                            dataSource:res.data.data ||[]
+                        })
+                    }else{
+                        message.error(res.data.msg)
+                    }
+                }).catch(err=>{
+                    message.error(err)
+                })
+            }else{
+                message.error(err)
+            }
+        })
+        
+    }
+    getSelectData(selectedRowKeys,selectedRows){
+        this.setState({selectGoodsIds:selectedRows.length?selectedRows.map(v=>v.id):[]})
+    }
     render() {
         const {columns,dataSource,deletSortVisible,clearSortVisible,sortList}=this.state
         const { getFieldDecorator } = this.props.form;
+        const rowSelection = {
+                onChange: (selectedRowKeys,selectedRows)=>this.getSelectData(selectedRowKeys,selectedRows),
+                getCheckboxProps: record => ({
+                    disabled: record.name === 'Disabled User', // Column configuration not to be checked
+                    name: record.name,
+                }),
+            };
         return (
             <GooodListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
-                        {
-                            getFieldDecorator("category_id",{
-                                initialValue:'0'
+                    <Form layout='inline' onSubmit={(e)=>this.search(e)}>
+                        <Form.Item>
+                            {
+                            getFieldDecorator("category_name",{
+                                initialValue:''
                             })(
-                                <Select style={{ width: '120px',marginRight:'20px'}}>
-                                    <Option value="0">全部分类</Option>
+                                <Select style={{ width: '120px'}}>
+                                    <Option value="">全部分类</Option>
                                     {
                                         sortList.map(v=>{
-                                            return <Option value={v.id}>{v.category_name}</Option>
+                                            return <Option value={v.category_name}>{v.category_name}</Option>
                                         })
                                     }
                                 </Select>
                             )
                         }
-                        {
-                            getFieldDecorator("status",{
-                                initialValue:'0'
-                            })(
-                                <Select style={{ width: '120px' }}>
-                                    <Option value="0">全部</Option>
-                                    <Option value="1">已售出</Option>
-                                    <Option value="2">未售出</Option>
-                                </Select>
-                            )
-                        }
-                        {
-                            getFieldDecorator("goodsName")(
-                                <Input style={{ width: '120px', margin: '0 20px 0 20px' }} placeholder="商品名" />
-                            )
-                        }
-
-                        <Button type="primary" className="btn btn-large btn-block btn-default">搜索</Button>
+                        </Form.Item>
+                        <Form.Item>
+                           {
+                                getFieldDecorator("param")(
+                                    <Input style={{ width: '120px', margin: '0 20px 0 20px' }} placeholder="商品名" />
+                                )
+                            }
+                        </Form.Item>
+                        <Form.Item>
+                            {/* <input className='addSortBtn' type="submit" value='添加分类'/> */}
+                           <input type="submit" className="btn btn-large btn-block btn-default search-btn" value="搜索"/>
+                        </Form.Item>
+                    </Form> 
                     </div>
                     <div className="right_box">
                         <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default" onClick={()=>this.exportExcel()}>导出</Button>
-                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
+                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default" onClick={()=>this.batchDeletion()}>批量删除</Button>
                         <Button type="danger" className="btn btn-large btn-block btn-default" onClick={()=>this.toAddGoods()}>添加商品</Button>
                     </div>
                 </div>

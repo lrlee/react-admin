@@ -1,7 +1,9 @@
 import React,{Component} from 'react';
 import {withRouter} from 'react-router-dom'
 import styled from 'styled-components';
-import {Icon} from 'antd'
+import {Icon,message} from 'antd'
+import {connect} from 'react-redux'
+import ajax from '@/utils/ajax'
 const HeaderStyle = styled.div`
     .header_container{
         display:flex;
@@ -32,8 +34,28 @@ const HeaderStyle = styled.div`
     }
 `;
 class HeaderNav extends Component {
+    logout(){
+        ajax({
+            url:'/userController/logout.do'
+        }).then(res=>{
+            if(res.data.result){
+                this.props.history.push({
+                    pathname:'/login'
+                })
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            console.log(err,"logout")
+        })
+    }
+    toSetting(){
+        this.props.history.push({
+            pathname:'/store/edit'
+        })
+    }
     render(){
-        console.log(this.props.location,"lo")
+        const {qq_group,tamount,wamount} = this.props.navInfo
         return (
             <HeaderStyle>
                 <div className="header_container">
@@ -43,18 +65,18 @@ class HeaderNav extends Component {
                             ID: <span className="user_id">17361</span>
                         </div>
                         <div className="withdraw_box">
-                            $今日可提现: <span className="withdraw_amount">0.00</span><span className="withdraw_btn">提现</span>
+                            $今日可提现: <span className="withdraw_amount">{tamount}</span><span className="withdraw_btn">提现</span>
                         </div>
                         <div className="balance_box">
-                            $未结余额: <span className="balance">0.00 </span>
+                            $未结余额: <span className="balance">{wamount} </span>
                         </div>
                         <div className="merchant_group">
-                            商户群<span className="group">226044934</span>
+                            商户群<span className="group">{qq_group}</span>
                         </div>
-                        <div className="reset">
+                        <div className="reset" onClick={()=>this.toSetting()}>
                             <span><Icon type="setting"/>设置</span>
                         </div>
-                        <div className="logout">
+                        <div className="logout" onClick={()=>this.logout()}>
                             <span><Icon type="poweroff"/>退出</span>
                         </div>
                     </div>
@@ -64,5 +86,8 @@ class HeaderNav extends Component {
         )
     }
 }
-
-export default  withRouter(HeaderNav);
+const mapStateToProps = state=>({
+    userInfo:state.user,
+    navInfo:state.navInfo
+})
+export default connect(mapStateToProps,null)(withRouter(HeaderNav));

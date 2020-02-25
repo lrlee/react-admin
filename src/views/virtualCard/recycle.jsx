@@ -41,9 +41,10 @@ class RecycleList extends Component {
     state = {
         //分类数据
         sortList:[],
+        goodsList:[],
         //恢复虚拟卡id
-        restoreCardId:null,
-        deleteCardId:null,
+        restoreCardId:[],
+        deleteCardId:[],
         //删除虚拟卡
         deleteVisible:false,
         restoreVisible:false,
@@ -92,6 +93,7 @@ class RecycleList extends Component {
     componentDidMount(){
         this.getRecycleList()
         this.getSortList()
+        this.getGoodsList()
     }
     //获取分类数据
     getSortList(){
@@ -112,12 +114,30 @@ class RecycleList extends Component {
             message.error(err.data.msg)
         })
     }
+    //获取商品列表
+    getGoodsList(){
+        ajax({
+            url:'/goodsController/getGoods.do',
+            params:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                this.setState({goodsList:res.data.data})
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
     //获取回收站列表
     getRecycleList(){
         ajax({
             url:'/virtualCardController/getVirtualCard.do',
             params:{
-                bussinessId:this.props.userInfo.businessId
+                bussinessId:this.props.userInfo.businessId,
+                type:'del'
             }
         }).then(res=>{
             if(res.data.result){
@@ -131,22 +151,20 @@ class RecycleList extends Component {
             message.error(err.data.msg)
         })
     }
-    //删除分类
+    //删除虚拟卡
     deleteCard(record){
-        this.setState({deleteVisible:true,deleteCardId:record.id})
+        this.setState({deleteVisible:true,restoreCardId:[record.id]})
     }
-    //恢复分类
+    //恢复虚拟卡
     restoreCard(data){
-        this.setState({restoreVisible:true,restoreCardId:data.id})
+        this.setState({restoreVisible:true,restoreCardId:[data.id]})
     }
     confirmDelete(){
-        const {deleteCardId} = this.state
+        const {restoreCardId} = this.state
         ajax({
             url:"/virtualCardController/removeVirtualCard.do",
             method:'post',
-            data:{
-                virtual_card_id:deleteCardId
-            }
+            data:restoreCardId
         }).then(res=>{
             if(res.data.result){
                 message.success(res.data.msg)
@@ -165,13 +183,11 @@ class RecycleList extends Component {
         ajax({
             url:'/virtualCardController/recoveryVirtualCard.do',
             method:'post',
-            data:{
-                virtual_card_id:restoreCardId
-            }
+            data:restoreCardId
         }).then(res=>{
             if(res.data.result){
                 message.success(res.data.msg)
-                this.setState({restoreVisible:false,restoreCardId:null})
+                this.setState({restoreVisible:false})
                 this.getRecycleList()
             }else{
                 message.error(res.data.msg)
@@ -180,14 +196,72 @@ class RecycleList extends Component {
             message.error(err.data.msg)
         })
     }
+    //获取选择的商品
+    getSelectData(selectedRowKeys,selectedRows){
+        this.setState({restoreCardId:selectedRows.length?selectedRows.map(v=>v.id):[]})
+    }
+    //批量恢复
+    bulkRecovery(){
+        const {restoreCardId} = this.state
+        if(!restoreCardId.length){
+            message.warning("请选择需要恢复的数据")
+            return;
+        }
+        this.setState({restoreVisible:true,restoreCardId:restoreCardId})
+    }
+    //批量删除
+    batchDeletion(){
+        const {restoreCardId} = this.state
+        if(!restoreCardId.length){
+            message.warning("请选择需要删除的数据")
+            return;
+        }
+        this.setState({deleteVisible:true})
+    }
+    //清空回收站
+    emptyRecycle(){
+        const {dataSource} = this.state
+        if(!dataSource.length){
+            message.info("回收站已为空")
+            return;
+        }
+        this.setState({clearRecycleVisible:true})
+    }
+    //确定清空回收站
+    clearRecycle(){
+        ajax({
+            url:'virtualCardController/clearDelVirtualCard.do',
+            method:'post',
+            data:{
+                bussinessId:this.props.userInfo.businessId
+            }
+        }).then(res=>{
+            if(res.data.result){
+                message.success("清除成功")
+            }else{
+                message.error(res.data.msg)
+            }
+        }).catch(err=>{
+            message.error(err.data.msg)
+        })
+    }
     render() {
-        const {columns,dataSource,deleteVisible,restoreVisible,clearRecycleVisible,sortList}=this.state
+        const {columns,dataSource,deleteVisible,restoreVisible,clearRecycleVisible,sortList,goodsList}=this.state
         const { getFieldDecorator } = this.props.form;
+        const rowSelection = {
+            onChange: (selectedRowKeys,selectedRows)=>this.getSelectData(selectedRowKeys,selectedRows),
+            getCheckboxProps: record => ({
+                disabled: record.name === 'Disabled User', // Column configuration not to be checked
+                name: record.name,
+            }),
+        };
         return (
             <GooodListStyle>
                 <div className="top_action_box">
                     <div className="left_box">
-                        {
+                         <Form layout='inline' onSubmit={(e)=>this.search(e)}>
+                        <Form.Item>
+                            {
                             sortList.length && (
                                 getFieldDecorator("sortName",{
                                     initialValue:'0'
@@ -201,18 +275,39 @@ class RecycleList extends Component {
                                 )
                             )
                         }
-                        {
-                            getFieldDecorator("goodsName")(
-                                <Input style={{ width: '120px', margin: '0 20px 0 20px' }} placeholder="商品名" />
+                        </Form.Item>
+                        <Form.Item>
+                            {
+                            getFieldDecorator("goods_id",{
+                                initialValue:'0'
+                            })(
+                                <Select style={{ width: '120px',marginLeft:'20px'}}>
+                                    <Option value="0">全部商品</Option>
+                                    {
+                                        goodsList.map(v=>{
+                                            return <Option value={v.id}>{v.category_name}</Option>
+                                        })
+                                    }
+                                </Select>
                             )
                         }
-
-                        <Button type="primary" className="btn btn-large btn-block btn-default">搜索</Button>
+                        </Form.Item>
+                        <Form.Item>
+                           {
+                                getFieldDecorator("param")(
+                                    <Input style={{ width: '120px', margin: '0 20px 0 20px' }} placeholder="商品名" />
+                                )
+                            }
+                        </Form.Item>
+                        <Form.Item>
+                           <input type="submit" className="btn btn-large btn-block btn-default search-btn" value="搜索"/>
+                        </Form.Item>
+                    </Form> 
                     </div>
                     <div className="right_box">
-                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量恢复</Button>
-                        <Button type="danger"  style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default">批量删除</Button>
-                        <Button type="danger" onClick={()=>this.clearRecycle()} className="btn btn-large btn-block btn-default">清空回收站</Button>
+                        <Button type="primary" style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default" onClick={()=>this.bulkRecovery()}>批量恢复</Button>
+                        <Button type="danger"  style={{ marginRight: '10px' }} className="btn btn-large btn-block btn-default" onClick={()=>this.batchDeletion()}>批量删除</Button>
+                        <Button type="danger" onClick={()=>this.emptyRecycle()} className="btn btn-large btn-block btn-default">清空回收站</Button>
                     </div>
                 </div>
                 <div className="table_list_box">

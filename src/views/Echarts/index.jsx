@@ -1,31 +1,54 @@
 import React,{Component} from 'react';
 import ReactEcharts from 'echarts-for-react';
-const data = {
-        xAxis: {
-            type: 'category',
-            axisLabel: {
-                formatter: function (value, idx) {
-                    var date = new Date(value);
-                    return idx === 0 ? value : [date.getMonth() + 1, date.getDate()].join('-');
-                }
-            },
-            splitLine: {
-                show: false
-            },
-            boundaryGap: false
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [{
-            data: [0.25, 0.5, 0.75, 1],
-            type: 'line'
-        }]
-    }
+
 class Echarts extends Component {
+    state = {
+        data:{
+            xAxis: {
+                type: 'category',
+                data:[],
+                splitLine: {
+                    show: false
+                },
+                boundaryGap: false
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: [0.25, 0.5, 0.75, 1],
+                type: 'line'
+            }]
+        }
+    }
+    componentWillReceiveProps (nextProps){
+        if(nextProps.data!=this.props.data){
+            this.setState({
+                data:{
+                    xAxis: {
+                        type: 'category',
+                        data:nextProps.data.time,
+                        splitLine: {
+                            show: false
+                        },
+                        boundaryGap: false
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: nextProps.data.value,
+                        type: 'line'
+                    }]
+                }
+            })
+        }
+    }
     render(){
+        const {data} = this.state
+        console.log(data,"data")
         return (
-            <ReactEcharts option={data}/>
+            data?<ReactEcharts option={data}/>:null
         )
     }
 }

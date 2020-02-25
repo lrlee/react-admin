@@ -20,7 +20,17 @@ const LoginLogStyled = styled.div`
 class LoginLog extends Component {
     state={
         //登录日志
-        logList:[]
+        logList:[],
+        columns:[
+            {
+                title:'登录IP',
+                dataIndex:'login_ip'
+            },
+            {
+                title:'登录时间',
+                dataIndex:'login_time'
+            }
+        ]
     }
     componentDidMount(){
         this.getLogList()
@@ -28,11 +38,7 @@ class LoginLog extends Component {
     //获取登录日志
     getLogList(){
         ajax({
-<<<<<<< HEAD
-            url:'/userController/loginLogs.do?account=lee1991',
-=======
             url:'/userController/loginLogs.do',
->>>>>>> 310310aa2c10b6b2288d339143e98341148abb98
             method:'get',
             params:{
                 account:'lee1991'
@@ -44,13 +50,12 @@ class LoginLog extends Component {
         })
     }
     render(){
-        const {logList} = this.state
-        console.log(logList)
+        const {logList,columns} = this.state
         return(
             <LoginLogStyled>
                 <div className="loginLog_box">
                     <p className="title">只保留显示最近30天的登录日志</p>
-                    <TableList data={logList}/>
+                    <TableList columns={columns} data={logList}/>
                 </div>
             </LoginLogStyled>
         )

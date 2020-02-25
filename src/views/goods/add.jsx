@@ -33,10 +33,15 @@ const AddGoodsStyled = styled.div`
 `;
 class AddGoods extends Component {
     state={
-        sortList:[]
+        sortList:[],
+        goodsId:this.props.location && this.props.location.state && this.props.location.state.goodsId || null,
+        goodsInfo:{}
     }
     componentDidMount(){
         this.getSortList()
+        if(this.state.goodsId){
+            this.getGoodsDetails()
+        }
     }
     //获取分类列表
     getSortList(){
@@ -54,12 +59,32 @@ class AddGoods extends Component {
                 message.error(res.data.msg)
             }
         }).catch(err=>{
+            message.error(err.msg)
+        })
+    }
+    //获取商品详情
+    getGoodsDetails(){
+        const {goodsId} = this.state
+        ajax({
+            url:`/goodsController/getGoodsInfoById.do?id=${goodsId}`,
+        }).then(res=>{
+            this.setState({
+                goodsInfo:res.data.data
+            })
+        }).catch(err=>{
             message.error(err.data.msg)
         })
     }
+    //保存
+    save(){
+        if(this.props.location.state.goodsId){//编辑
+            this.editGoods()
+        }else{
+            this.addGoods()
+        }
+    }
     //新增商品
     addGoods(){
-        console.log(this.props.form.getFieldsValue(),"getFieldsValue")
         this.props.form.validateFields((err,values)=>{
             if(!err){
                 ajax({
@@ -79,9 +104,30 @@ class AddGoods extends Component {
             }
         })
     }
+    //编辑商品
+    editGoods(){
+        const {goodsId} = this.state
+        this.props.form.validateFields((err,values)=>{
+            if(!err){
+                ajax({
+                    url:"/goodsController/modifyGoods.do",
+                    method:'post',
+                    data:{...values,bussinessId:this.props.userInfo.businessId,id:goodsId}
+                }).then(res=>{
+                    if(res.data.result){
+                        message.success(res.data.msg)
+                    }else{
+                        message.error(res.data.msg)
+                    }
+                }).catch(err=>{
+                    message.error(err.data.msg)
+                })
+            }
+        })
+    }
     render(){
         const {getFieldDecorator} = this.props.form
-        const {sortList} = this.state
+        const {sortList,goodsId,goodsInfo} = this.state
         return (
             <AddGoodsStyled>
                 <Form {...formItemLayout}>
@@ -91,7 +137,7 @@ class AddGoods extends Component {
                                 
                                 sortList.length && (
                                     getFieldDecorator('category_id',{
-                                        initialValue:sortList[0].id
+                                        initialValue:this.props.location && this.props.location.state && this.props.location.state.categoryId || sortList[0].id
                                     })(
                                         <Select>
                                             {
@@ -109,8 +155,10 @@ class AddGoods extends Component {
                     <Form.Item label="商品排序">
                         <div className="sortName_box">
                             {
-                                getFieldDecorator('sort')(
-                                    <Input value="0"/>
+                                getFieldDecorator('sort',{
+                                    initialValue:goodsInfo.sort || 0
+                                })(
+                                    <Input />
                                 )
                             }
                             <span className="tips_text">数字越大越靠前!</span>
@@ -120,7 +168,9 @@ class AddGoods extends Component {
                     <Form.Item label="商品名称">
                         <div className="sortName_box">
                             {
-                                getFieldDecorator('goods_name')(
+                                getFieldDecorator('goods_name',{
+                                    initialValue:goodsInfo.goods_name || ""
+                                })(
                                     <Input placeholder="商品名称" />
                                 )
                             }
@@ -131,7 +181,9 @@ class AddGoods extends Component {
                         
                         <div className="sortName_box">
                             {
-                                getFieldDecorator('goods_price')(
+                                getFieldDecorator('goods_price',{
+                                    initialValue:goodsInfo.goods_price || ''
+                                })(
                                     <Input placeholder="商品价格" />
                                 )
                             }
@@ -142,7 +194,9 @@ class AddGoods extends Component {
                     <Form.Item label="成本价格">
                         <div className="sortName_box">
                             {
-                                getFieldDecorator('goods_cost_price')(
+                                getFieldDecorator('goods_cost_price',{
+                                    initialValue:goodsInfo.goods_cost_price || ''
+                                })(
                                     <Input placeholder="单位(元)" />
                                 )
                             }
@@ -153,7 +207,7 @@ class AddGoods extends Component {
                         <div className="sortName_box">
                             {
                                 getFieldDecorator('sms_cost',{
-                                    initialValue:'1'
+                                    initialValue:goodsInfo.sms_cost || '1'
                                 })(
                                     <Radio.Group>
                                         <Radio value="1">买家承担</Radio>
@@ -167,8 +221,10 @@ class AddGoods extends Component {
                         <div className="sortName_box">
                             <div className="sortName_box">
                             {
-                                getFieldDecorator('floor_num')(
-                                    <Input value="1" />
+                                getFieldDecorator('floor_num',{
+                                    initialValue:goodsInfo.floor_num || '1'
+                                })(
+                                    <Input  />
                                 )
                             }
                                 <span className="tips_text">每次购买 最少购买多少件！</span>
@@ -180,7 +236,7 @@ class AddGoods extends Component {
                             <div className="sortName_box">
                             {
                                 getFieldDecorator('tical_password',{
-                                    initialValue:'0'
+                                    initialValue:goodsInfo.tical_password || '0'
                                 })(
                                     <Radio.Group>
                                         <Radio value="1">必填</Radio>
@@ -199,7 +255,7 @@ class AddGoods extends Component {
                             <div className="sortName_box">
                             {
                                 getFieldDecorator('sold_info',{
-                                    initialValue:'0'
+                                    initialValue:goodsInfo.sold_info || '0'
                                 })(
                                     <Radio.Group>
                                         <Radio value="1">开启</Radio>
@@ -214,7 +270,9 @@ class AddGoods extends Component {
                     <Form.Item label="商品说明">      
                         <div className="sortName_box">
                             <div className="sortName_box">
-                            {getFieldDecorator('goods_desc')(
+                            {getFieldDecorator('goods_desc',{
+                                initialValue:goodsInfo.goods_desc || ''
+                            })(
                                 <TextArea rows={4} placeholder="建议填写该商品的使用方法，文字不超过200字" />
                             )}
                                 <span className="tips_text">商品说明将显示在商品购买页面</span>
@@ -224,7 +282,9 @@ class AddGoods extends Component {
                     <Form.Item label="使用说明">      
                         <div className="sortName_box">
                             <div className="sortName_box">
-                            {getFieldDecorator('goods_use_desc')(
+                            {getFieldDecorator('goods_use_desc',{
+                                initialValue:goodsInfo.goods_use_desc || ''
+                            })(
                                 <TextArea rows={4} placeholder="建议填写该商品的使用方法，文字不超过200字" />
                             )}
                                 <span className="tips_text">使用说明将显示在订单查询结果中，一般设置售后QQ群，或者下载地址类</span>
@@ -232,7 +292,7 @@ class AddGoods extends Component {
                         </div>
                     </Form.Item>
                     <Form.Item label="" >
-                        <Button style={{marginLeft:'18vw'}} type="primary" onClick={(e)=>this.addGoods()}>确认提交</Button>
+                        <Button style={{marginLeft:'18vw'}} type="primary" onClick={(e)=>this.save()}>确认提交</Button>
                     </Form.Item>
                 </Form>
             </AddGoodsStyled>

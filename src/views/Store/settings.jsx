@@ -48,6 +48,11 @@ const UserSettingsStyled = styled.div`
 `;
 
 class UserSettings extends Component {
+    state={
+        info:{
+            bussinessInfo:{}
+        }
+    }
     componentWillMount(){
         this.getUserInfo()
     }
@@ -59,13 +64,20 @@ class UserSettings extends Component {
                 bussinessId:this.props.userInfo && this.props.userInfo.businessId
             }
         }).then(res=>{
-            console.log(res,"rrrrr")
+            if(res.data.result){
+                this.setState({
+                    info:res.data || {}
+                })
+            }else{
+                message.error(res.data.msg)
+            }
         }).catch(err=>{
             message.error(err.data.msg)
         })
     }
     render() {
         const { getFieldDecorator } = this.props.form;
+        const {info} = this.state
         return (
             <UserSettingsStyled>
                 <div className="settings_container">
@@ -78,7 +90,7 @@ class UserSettings extends Component {
                             <Form.Item
                                 label="商户编号"
                             >
-                                <span className="num">012022</span>
+                                <span className="num">{info.bussinessInfo.id}</span>
                             </Form.Item>
                             <Form.Item
                                 label="用户名"
